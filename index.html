@@ -3,43 +3,215 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon premier site</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d1b">
+  <title>Mon univers | Bienvenue</title>
+  <meta name="description" content="Découvre mon univers numérique.">
   <style>
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #101827;
-      color: white;
-      text-align: center;
-      padding: 70px 20px;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f8fafc;
+      background:
+        radial-gradient(ellipse at 50% 0%, #18366b 0%, transparent 55%),
+        #080d1b;
     }
-    .carte {
-      max-width: 500px;
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 7%;
+      border-bottom: 1px solid #ffffff12;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -1px;
+    }
+
+    .logo span { color: #60a5fa; }
+
+    .status {
+      font-size: 12px;
+      color: #a5b4fc;
+      border: 1px solid #35466a;
+      border-radius: 30px;
+      padding: 8px 12px;
+    }
+
+    main {
+      width: min(900px, 100%);
       margin: auto;
-      padding: 30px 20px;
-      background: #1e293b;
-      border-radius: 20px;
+      padding: 90px 24px 70px;
+      text-align: center;
     }
-    h1 { color: #60a5fa; }
-    p { line-height: 1.7; }
-    a {
+
+    .tag {
       display: inline-block;
-      margin-top: 15px;
-      padding: 12px 20px;
-      background: #2563eb;
-      color: white;
+      padding: 9px 14px;
+      color: #93c5fd;
+      background: #60a5fa14;
+      border: 1px solid #60a5fa35;
+      border-radius: 30px;
+      font-size: 13px;
+    }
+
+    h1 {
+      font-size: clamp(42px, 9vw, 76px);
+      line-height: 1.08;
+      letter-spacing: -3px;
+      margin: 28px 0 20px;
+    }
+
+    h1 span {
+      background: linear-gradient(90deg, #60a5fa, #c4b5fd);
+      color: transparent;
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .intro {
+      max-width: 550px;
+      margin: 0 auto;
+      color: #a8b3c7;
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 21px;
+      border-radius: 12px;
       text-decoration: none;
-      border-radius: 10px;
+      font-weight: 700;
+      transition: transform .2s, background .2s;
+    }
+
+    .btn:hover { transform: translateY(-3px); }
+
+    .primary {
+      background: #3b82f6;
+      color: white;
+      box-shadow: 0 8px 30px #3b82f630;
+    }
+
+    .secondary {
+      color: #e2e8f0;
+      border: 1px solid #ffffff25;
+      background: #ffffff08;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 75px;
+      text-align: left;
+    }
+
+    .card {
+      padding: 23px 18px;
+      border: 1px solid #ffffff14;
+      border-radius: 18px;
+      background: #ffffff08;
+    }
+
+    .emoji { font-size: 27px; }
+
+    .card h2 {
+      font-size: 17px;
+      margin: 16px 0 8px;
+    }
+
+    .card p {
+      color: #a8b3c7;
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #8490a5;
+      font-size: 13px;
+      border-top: 1px solid #ffffff12;
+    }
+
+    @media (max-width: 600px) {
+      main { padding-top: 65px; }
+      h1 { letter-spacing: -2px; }
+      .cards { grid-template-columns: 1fr; margin-top: 50px; }
+      .card { padding: 22px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="carte">
-    <h1>Bienvenue sur mon site !</h1>
-    <p>Je viens de créer mon premier site web avec GitHub.</p>
-    <p>Ce n'est que le début de mon projet.</p>
-    <a href="https://github.com/">Découvrir GitHub</a>
-  </div>
+  <nav>
+    <div class="logo">MON<span>UNIVERS</span></div>
+    <div class="status">● Site en ligne</div>
+  </nav>
+
+  <main>
+    <div class="tag">✦ Bienvenue dans mon univers</div>
+
+    <h1>Les idées deviennent<br><span>réalité.</span></h1>
+
+    <p class="intro">
+      Ceci est mon premier site web. Je construis,
+      j'apprends et je transforme mes idées en projets
+      grâce à la technologie.
+    </p>
+
+    <div class="actions">
+      <a class="btn primary" href="#decouvrir">Découvrir ↓</a>
+      <a class="btn secondary"
+         href="https://github.com/ndiayeelage0508-cloud/mon-premier-site">
+        Mon GitHub ↗
+      </a>
+    </div>
+
+    <section class="cards" id="decouvrir">
+      <article class="card">
+        <div class="emoji">💡</div>
+        <h2>Mes idées</h2>
+        <p>Un espace pour présenter mes idées et mes projets futurs.</p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">🚀</div>
+        <h2>Mes projets</h2>
+        <p>Chaque projet est une nouvelle occasion d'apprendre.</p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">🌍</div>
+        <h2>Mon ambition</h2>
+        <p>Créer des choses utiles et accessibles depuis partout.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer>Créé avec passion · Publié avec GitHub Pages</footer>
 </body>
 </html>
