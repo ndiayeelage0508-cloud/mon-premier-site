@@ -2,216 +2,139 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080d1b">
-  <title>Mon univers | Bienvenue</title>
-  <meta name="description" content="Découvre mon univers numérique.">
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #f8fafc;
-      background:
-        radial-gradient(ellipse at 50% 0%, #18366b 0%, transparent 55%),
-        #080d1b;
-    }
-
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 7%;
-      border-bottom: 1px solid #ffffff12;
-    }
-
-    .logo {
-      font-weight: 800;
-      font-size: 20px;
-      letter-spacing: -1px;
-    }
-
-    .logo span { color: #60a5fa; }
-
-    .status {
-      font-size: 12px;
-      color: #a5b4fc;
-      border: 1px solid #35466a;
-      border-radius: 30px;
-      padding: 8px 12px;
-    }
-
-    main {
-      width: min(900px, 100%);
-      margin: auto;
-      padding: 90px 24px 70px;
-      text-align: center;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 9px 14px;
-      color: #93c5fd;
-      background: #60a5fa14;
-      border: 1px solid #60a5fa35;
-      border-radius: 30px;
-      font-size: 13px;
-    }
-
-    h1 {
-      font-size: clamp(42px, 9vw, 76px);
-      line-height: 1.08;
-      letter-spacing: -3px;
-      margin: 28px 0 20px;
-    }
-
-    h1 span {
-      background: linear-gradient(90deg, #60a5fa, #c4b5fd);
-      color: transparent;
-      background-clip: text;
-      -webkit-background-clip: text;
-    }
-
-    .intro {
-      max-width: 550px;
-      margin: 0 auto;
-      color: #a8b3c7;
-      font-size: 17px;
-      line-height: 1.8;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 32px;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 14px 21px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: 700;
-      transition: transform .2s, background .2s;
-    }
-
-    .btn:hover { transform: translateY(-3px); }
-
-    .primary {
-      background: #3b82f6;
-      color: white;
-      box-shadow: 0 8px 30px #3b82f630;
-    }
-
-    .secondary {
-      color: #e2e8f0;
-      border: 1px solid #ffffff25;
-      background: #ffffff08;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-top: 75px;
-      text-align: left;
-    }
-
-    .card {
-      padding: 23px 18px;
-      border: 1px solid #ffffff14;
-      border-radius: 18px;
-      background: #ffffff08;
-    }
-
-    .emoji { font-size: 27px; }
-
-    .card h2 {
-      font-size: 17px;
-      margin: 16px 0 8px;
-    }
-
-    .card p {
-      color: #a8b3c7;
-      font-size: 14px;
-      line-height: 1.7;
-      margin-bottom: 0;
-    }
-
-    footer {
-      text-align: center;
-      padding: 25px;
-      color: #8490a5;
-      font-size: 13px;
-      border-top: 1px solid #ffffff12;
-    }
-
-    @media (max-width: 600px) {
-      main { padding-top: 65px; }
-      h1 { letter-spacing: -2px; }
-      .cards { grid-template-columns: 1fr; margin-top: 50px; }
-      .card { padding: 22px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        transition: none !important;
-        scroll-behavior: auto !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d1b">
+<title>PromptLab — Améliore tes idées</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f8fafc;background:radial-gradient(ellipse at 50% 0%,#19376d,transparent 55%),#080d1b}
+header{padding:22px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ffffff15}
+.logo{font-size:22px;font-weight:850;letter-spacing:-1px}
+.logo span{color:#60a5fa}
+.pill{font-size:12px;color:#93c5fd;border:1px solid #34466a;padding:7px 10px;border-radius:20px}
+main{width:min(760px,100%);margin:auto;padding:55px 20px 70px}
+.hero{text-align:center;margin-bottom:35px}
+.tag{color:#93c5fd;font-size:13px;border:1px solid #34466a;background:#60a5fa12;padding:8px 12px;border-radius:30px;display:inline-block}
+h1{font-size:clamp(38px,9vw,60px);letter-spacing:-2px;line-height:1.08;margin:22px 0 14px}
+h1 span{background:linear-gradient(90deg,#60a5fa,#c4b5fd);color:transparent;background-clip:text}
+.hero p{color:#a8b3c7;line-height:1.7;max-width:510px;margin:auto}
+.panel{background:#10182b;border:1px solid #ffffff1c;border-radius:20px;padding:22px;box-shadow:0 20px 60px #0003}
+label{display:block;font-size:14px;font-weight:700;margin:18px 0 9px}
+label:first-child{margin-top:0}
+textarea,select{width:100%;border:1px solid #34415b;background:#080f20;color:#f8fafc;border-radius:12px;padding:14px;font:inherit;font-size:15px;outline:none}
+textarea{min-height:130px;resize:vertical;line-height:1.6}
+textarea:focus,select:focus{border-color:#60a5fa}
+select{margin-bottom:2px}
+button{width:100%;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:750;cursor:pointer}
+.primary{margin-top:22px;background:linear-gradient(90deg,#3b82f6,#6366f1);color:white}
+.secondary{margin-top:12px;background:#ffffff0d;border:1px solid #ffffff25;color:white}
+.result{display:none;margin-top:22px;padding:18px;border:1px solid #3b82f655;background:#0b1427;border-radius:16px}
+.result h2{font-size:18px;margin:0 0 12px}
+#output{white-space:pre-wrap;overflow-wrap:anywhere;color:#dbeafe;line-height:1.7;font-size:14px}
+.note{text-align:center;color:#8290a8;font-size:12px;line-height:1.7;margin-top:22px}
+footer{text-align:center;color:#8290a8;font-size:12px;padding:25px;border-top:1px solid #ffffff12}
+</style>
 </head>
 <body>
-  <nav>
-    <div class="logo">MON<span>UNIVERS</span></div>
-    <div class="status">● Site en ligne</div>
-  </nav>
+<header>
+  <div class="logo">Prompt<span>Lab</span> ✦</div>
+  <div class="pill">Version 1.0</div>
+</header>
 
-  <main>
-    <div class="tag">✦ Bienvenue dans mon univers</div>
+<main>
+  <section class="hero">
+    <div class="tag">✦ Transforme tes idées</div>
+    <h1>Une idée.<br><span>Un meilleur prompt.</span></h1>
+    <p>Décris ce que tu veux accomplir. PromptLab transforme ton idée en une consigne claire, précise et prête à utiliser avec une IA.</p>
+  </section>
 
-    <h1>Les idées deviennent<br><span>réalité.</span></h1>
+  <section class="panel">
+    <label for="idea">1. Quelle est ton idée ?</label>
+    <textarea id="idea" placeholder="Exemple : je veux créer une application qui détecte les cryptomonnaies susceptibles de monter..."></textarea>
 
-    <p class="intro">
-      Ceci est mon premier site web. Je construis,
-      j'apprends et je transforme mes idées en projets
-      grâce à la technologie.
-    </p>
+    <label for="task">2. Quel est ton objectif ?</label>
+    <select id="task">
+      <option value="Créer un projet ou une application">Créer une application ou un projet</option>
+      <option value="Écrire un texte ou un scénario">Écrire un texte ou un scénario</option>
+      <option value="Apprendre et comprendre un sujet">Apprendre un sujet</option>
+      <option value="Analyser des données et prendre une décision">Analyser des données</option>
+      <option value="Créer une image ou une vidéo">Créer une image ou une vidéo</option>
+      <option value="Résoudre un problème technique">Résoudre un problème technique</option>
+      <option value="Développer une stratégie commerciale">Développer une stratégie commerciale</option>
+    </select>
 
-    <div class="actions">
-      <a class="btn primary" href="#decouvrir">Découvrir ↓</a>
-      <a class="btn secondary"
-         href="https://github.com/ndiayeelage0508-cloud/mon-premier-site">
-        Mon GitHub ↗
-      </a>
+    <label for="style">3. Quel niveau de détail ?</label>
+    <select id="style">
+      <option value="Détaillé, avec des étapes concrètes">Détaillé et professionnel</option>
+      <option value="Simple, clair et facile à comprendre">Simple et accessible</option>
+      <option value="Expert, approfondi et technique">Expert et technique</option>
+    </select>
+
+    <button class="primary" onclick="generate()">✦ Améliorer mon prompt</button>
+
+    <div class="result" id="result">
+      <h2>Ton prompt amélioré</h2>
+      <div id="output"></div>
+      <button class="secondary" onclick="copyPrompt()">Copier le prompt</button>
     </div>
+    <p class="note">Cette version fonctionne directement dans ton navigateur. Elle structure ton idée, mais n'appelle pas encore de véritable modèle d'IA.</p>
+  </section>
+</main>
 
-    <section class="cards" id="decouvrir">
-      <article class="card">
-        <div class="emoji">💡</div>
-        <h2>Mes idées</h2>
-        <p>Un espace pour présenter mes idées et mes projets futurs.</p>
-      </article>
+<footer>PromptLab · Construit pour transformer les idées en projets.</footer>
 
-      <article class="card">
-        <div class="emoji">🚀</div>
-        <h2>Mes projets</h2>
-        <p>Chaque projet est une nouvelle occasion d'apprendre.</p>
-      </article>
+<script>
+function generate(){
+  const idea=document.getElementById('idea').value.trim();
+  if(!idea){
+    document.getElementById('idea').focus();
+    alert('Écris d’abord ton idée dans la zone prévue.');
+    return;
+  }
+  const task=document.getElementById('task').value;
+  const style=document.getElementById('style').value;
+  const prompt=`Agis comme un expert spécialisé dans ce domaine.
 
-      <article class="card">
-        <div class="emoji">🌍</div>
-        <h2>Mon ambition</h2>
-        <p>Créer des choses utiles et accessibles depuis partout.</p>
-      </article>
-    </section>
-  </main>
+MON OBJECTIF
+${task}
 
-  <footer>Créé avec passion · Publié avec GitHub Pages</footer>
+MON IDÉE
+${idea}
+
+TES INSTRUCTIONS
+1. Analyse mon idée et identifie le résultat que je cherche réellement à obtenir.
+2. Propose une approche adaptée, réaliste et efficace.
+3. Décompose le travail en étapes concrètes et ordonnées.
+4. Précise les outils, les ressources et les compétences nécessaires.
+5. Signale les risques, les limites et les erreurs à éviter.
+6. Si des informations essentielles manquent, pose-moi des questions avant de tirer des conclusions.
+7. Ne présente pas d’informations inventées comme des faits. Distingue les faits, les hypothèses et les recommandations.
+
+FORMAT DE LA RÉPONSE
+${style}.
+Utilise des titres clairs, des exemples pertinents et des actions directement applicables.
+
+Commence par reformuler brièvement mon objectif, puis aide-moi à l’atteindre.`;
+  document.getElementById('output').textContent=prompt;
+  document.getElementById('result').style.display='block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function copyPrompt(){
+  const text=document.getElementById('output').textContent;
+  try{
+    await navigator.clipboard.writeText(text);
+    alert('Prompt copié ! Tu peux maintenant le coller dans ton IA.');
+  }catch(e){
+    const area=document.createElement('textarea');
+    area.value=text;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand('copy');
+    area.remove();
+    alert('Copie effectuée. Tu peux coller ton prompt.');
+  }
+}
+</script>
 </body>
 </html>
