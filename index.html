@@ -27,9 +27,14 @@ textarea{min-height:130px;resize:vertical;line-height:1.6}
 textarea:focus,select:focus{border-color:#60a5fa}
 select{margin-bottom:2px}
 button{width:100%;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:750;cursor:pointer}
+button:disabled{cursor:wait;opacity:.65}
 .primary{margin-top:22px;background:linear-gradient(90deg,#3b82f6,#6366f1);color:white}
 .secondary{margin-top:12px;background:#ffffff0d;border:1px solid #ffffff25;color:white}
+.actions{display:grid;gap:12px;margin-top:22px}
+.actions button{margin-top:0}
 .result{display:none;margin-top:22px;padding:18px;border:1px solid #3b82f655;background:#0b1427;border-radius:16px}
+.result.error{border-color:#f8717155}
+.status{min-height:20px;margin:16px 0 0;color:#93c5fd;font-size:13px;text-align:center}
 .result h2{font-size:18px;margin:0 0 12px}
 #output{white-space:pre-wrap;overflow-wrap:anywhere;color:#dbeafe;line-height:1.7;font-size:14px}
 .note{text-align:center;color:#8290a8;font-size:12px;line-height:1.7;margin-top:22px}
@@ -71,30 +76,79 @@ footer{text-align:center;color:#8290a8;font-size:12px;padding:25px;border-top:1p
       <option value="Expert, approfondi et technique">Expert et technique</option>
     </select>
 
-    <button class="primary" onclick="generate()">✦ Améliorer mon prompt</button>
+    <div class="actions">
+      <button class="primary" id="generateButton" onclick="generate()">✦ Générer mon prompt</button>
+      <button class="secondary" id="optimizeButton" onclick="optimize()">Optimiser le prompt actuel</button>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
 
-    <div class="result" id="result">
-      <h2>Ton prompt amélioré</h2>
+    <div class="result" id="result" aria-live="polite">
+      <h2 id="resultTitle">Ton prompt amélioré</h2>
       <div id="output"></div>
       <button class="secondary" onclick="copyPrompt()">Copier le prompt</button>
     </div>
-    <p class="note">Cette version fonctionne directement dans ton navigateur. Elle structure ton idée, mais n'appelle pas encore de véritable modèle d'IA.</p>
+    <p class="note">Les boutons utilisent le Worker PromptLab pour générer ou optimiser ta consigne. Ton idée est envoyée uniquement lors de l'action demandée.</p>
   </section>
 </main>
 
 <footer>PromptLab · Construit pour transformer les idées en projets.</footer>
 
 <script>
-function generate(){
-  const idea=document.getElementById('idea').value.trim();
-  if(!idea){
-    document.getElementById('idea').focus();
-    alert('Écris d’abord ton idée dans la zone prévue.');
-    return;
+const API_URL = 'https://promptlab-ai.ndiayeelage0508.workers.dev/api/generate';
+
+async function callPromptLabAI(prompt, mode = 'generate') {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt, mode })
+  });
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error('Réponse invalide du service IA.');
   }
-  const task=document.getElementById('task').value;
-  const style=document.getElementById('style').value;
-  const prompt=`Agis comme un expert spécialisé dans ce domaine.
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || 'La requête IA a échoué.');
+  }
+  if (typeof data.answer !== 'string' || !data.answer.trim()) {
+    throw new Error('Le service IA a renvoyé une réponse vide. Réessaie.');
+  }
+  return data.answer;
+}
+
+function setLoading(loading, message = '') {
+  const buttons = [document.getElementById('generateButton'), document.getElementById('optimizeButton')];
+  buttons.forEach(button => { button.disabled = loading; });
+  document.getElementById('status').textContent = message;
+}
+
+function showResult(answer, title = 'Ton prompt amélioré') {
+  const result = document.getElementById('result');
+  result.classList.remove('error');
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('output').textContent = answer;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showError(error) {
+  const result = document.getElementById('result');
+  result.classList.add('error');
+  document.getElementById('resultTitle').textContent = 'Une erreur est survenue';
+  document.getElementById('output').textContent = error.message || 'La requête IA a échoué.';
+  result.style.display = 'block';
+}
+
+function buildPrompt() {
+  const idea = document.getElementById('idea').value.trim();
+  if (!idea) {
+    document.getElementById('idea').focus();
+    throw new Error('Écris d’abord ton idée dans la zone prévue.');
+  }
+  const task = document.getElementById('task').value;
+  const style = document.getElementById('style').value;
+  return `Agis comme un expert spécialisé dans ce domaine.
 
 MON OBJECTIF
 ${task}
@@ -116,10 +170,39 @@ ${style}.
 Utilise des titres clairs, des exemples pertinents et des actions directement applicables.
 
 Commence par reformuler brièvement mon objectif, puis aide-moi à l’atteindre.`;
-  document.getElementById('output').textContent=prompt;
-  document.getElementById('result').style.display='block';
-  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+async function generate() {
+  try {
+    setLoading(true, 'Génération en cours…');
+    const answer = await callPromptLabAI(buildPrompt(), 'generate');
+    showResult(answer);
+  } catch (error) {
+    showError(error);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function optimize() {
+  try {
+    const current = document.getElementById('result').classList.contains('error')
+      ? '' : document.getElementById('output').textContent.trim();
+    const prompt = current || document.getElementById('idea').value.trim();
+    if (!prompt) {
+      document.getElementById('idea').focus();
+      throw new Error('Écris d’abord ton idée dans la zone prévue.');
+    }
+    setLoading(true, 'Optimisation en cours…');
+    const answer = await callPromptLabAI(prompt, 'optimize');
+    showResult(answer, 'Ton prompt optimisé');
+  } catch (error) {
+    showError(error);
+  } finally {
+    setLoading(false);
+  }
+}
+
 async function copyPrompt(){
   const text=document.getElementById('output').textContent;
   try{
