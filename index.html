@@ -9,7 +9,7 @@
       content="PromptLab — crée, optimise et sauvegarde tes prompts et tes liens."
     />
     <title>PromptLab — Save, create, find.</title>
-    <link rel="stylesheet" href="./styles.css?v=20261021-3" />
+    <link rel="stylesheet" href="./styles.css?v=20261021-4" />
   </head>
   <body>
     <div class="backdrop-shape shape-pink"></div>
@@ -53,6 +53,9 @@
         <p class="hero-copy">
           Crée de meilleurs prompts. Garde tes idées. Retrouve tes liens.
         </p>
+        <button id="plansBtn" class="outline-btn plans-trigger" type="button">
+          Gratuit &amp; Premium · en préparation
+        </button>
       </section>
 
       <section class="quick-save panel">
@@ -115,7 +118,17 @@
             ><span class="card-arrow">↗</span>
           </button>
         </div>
+        <p class="offer-note">À venir : favoris et collections réservés au Premium.
+          Aucun changement d’accès pour le moment ; tes données restent intactes.</p>
       </section>
+
+      <!-- Inert by design: no ad provider, tracking, consent or external request. -->
+      <template id="adSlotTemplate">
+        <aside class="ad-slot panel" aria-label="Publicité">
+          <p class="eyebrow">PUBLICITÉ</p>
+          <div data-ad-content></div>
+        </aside>
+      </template>
 
       <section class="tool-panel panel" id="toolPanel">
         <div class="section-heading compact">
@@ -210,6 +223,29 @@
       </footer>
     </main>
 
+    <dialog id="plansDialog" class="settings-dialog plans-dialog" aria-labelledby="plansTitle">
+      <form method="dialog">
+        <button class="dialog-close" aria-label="Fermer">×</button>
+      </form>
+      <p class="eyebrow">LE FUTUR DE PROMPTLAB</p>
+      <h2 id="plansTitle">Gratuit &amp; Premium</h2>
+      <p>Le nouveau modèle est en préparation. Aucune offre Premium n’est encore en vente.</p>
+      <div class="plan-options">
+        <section class="plan-option" aria-labelledby="freePlanTitle">
+          <h3 id="freePlanTitle">Gratuit avec publicités</h3>
+          <p>Création et optimisation de prompts, avec les quotas IA actuels conservés.</p>
+          <p class="offer-note">Publicités non activées pour le moment.</p>
+        </section>
+        <section class="plan-option plan-premium" aria-labelledby="premiumPlanTitle">
+          <h3 id="premiumPlanTitle">Premium</h3>
+          <p>Les favoris et les collections seront réservés au Premium.</p>
+          <p class="offer-note">Disponibilité et modalités à venir.</p>
+        </section>
+      </div>
+      <p>Pour le moment, les accès restent inchangés. Tes favoris, liens et collections
+        existants ne sont ni modifiés ni supprimés par cette annonce.</p>
+    </dialog>
+
     <dialog id="settingsDialog" class="settings-dialog">
       <form method="dialog">
         <button class="dialog-close" aria-label="Fermer">×</button>
@@ -237,7 +273,8 @@
       <p class="eyebrow">COMPTE PROMPTLAB</p>
       <h2 id="accountTitle">Synchronise ton espace.</h2>
       <p id="accountIntro">
-        Crée un compte gratuit pour retrouver tes favoris, liens et collections.
+        La création du compte est gratuite. Les accès actuels restent inchangés
+        pendant la préparation de l’offre Premium pour les favoris et collections.
         La connexion par e-mail fonctionne sans e-mail de validation. Conserve
         ton code de récupération.
       </p>
@@ -351,6 +388,6 @@
       <input id="searchInput" type="search" placeholder="Rechercher…" />
       <div id="searchResults" class="saved-list"></div>
     </dialog>
-    <script src="./app.js?v=20261021-3"></script>
+    <script src="./app.js?v=20261021-4"></script>
   </body>
 </html>

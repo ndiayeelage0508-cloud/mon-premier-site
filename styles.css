@@ -735,3 +735,36 @@ footer {
 .account-delete .danger-btn {
   width: 100%;
 }
+
+/* Upcoming offers: informational only, no pricing or purchase controls. */
+.plans-trigger {
+  margin-top: 18px;
+  font-size: 0.8rem;
+}
+.offer-note {
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.plan-options {
+  display: grid;
+  gap: 14px;
+  margin: 20px 0;
+}
+.plan-option {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 16px;
+  background: white;
+}
+.plan-option h3 {
+  margin: 0 0 10px;
+}
+.plan-option p {
+  margin: 8px 0 0;
+}
+.plan-premium {
+  background: #f0ebff;
+}
+.ad-slot {
+  border-style: dashed;
+}

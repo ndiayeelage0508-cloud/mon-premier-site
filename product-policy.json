@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "status": "preparation_only",
+  "target": {
+    "free": { "advertising": true, "aiQuotas": "unchanged" },
+    "premium": { "features": ["favorites", "collections"], "price": null, "advertising": "undecided" },
+    "standaloneLinks": "undecided"
+  },
+  "activation": {
+    "premiumEnforcement": false,
+    "advertising": false,
+    "checkout": false,
+    "adProvider": null,
+    "paymentProvider": null,
+    "existingDataMigration": null
+  },
+  "safeguards": {
+    "preserveExistingData": true,
+    "preserveCurrentAccess": true,
+    "preserveAccountDeletionAndExport": true,
+    "noThirdPartySubscription": true
+  },
+  "note": "Design record only, not an authorization or entitlement source. Server enforcement requires a separate approved deployment."
+}

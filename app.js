@@ -871,6 +871,8 @@ function importAnon() {
     accountMsg("Données anonymes importées et synchronisation demandée.");
 }
 // UI wiring
+// Informational only: no paywall until server entitlements and migration are approved.
+$("plansBtn").addEventListener("click", () => $("plansDialog").showModal());
 $("runAiBtn").addEventListener("click", runAI);
 document
   .querySelectorAll(".mode-btn")

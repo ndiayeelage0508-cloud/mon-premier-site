@@ -1,6 +1,6 @@
 # PromptLab
 
-Application gratuite pour créer et optimiser des prompts, garder des favoris et ranger des liens dans des collections.
+Application pour créer et optimiser des prompts. Nouveau modèle cible : offre gratuite avec publicités, favoris et collections réservés au Premium. Ce modèle est en préparation, pas encore activé.
 
 - Site : https://ndiayeelage0508-cloud.github.io/mon-premier-site/
 - API : https://promptlab-ai.ndiayeelage0508.workers.dev/
@@ -11,7 +11,20 @@ Le bouton Compte permet de s’inscrire ou de se connecter avec un e-mail et un 
 
 À l’inscription, conserver le code de récupération affiché. Aucun service d’envoi d’e-mail n’est configuré : il n’y a ni e-mail de validation ni lien de réinitialisation. Le code permet de changer le mot de passe en cas d’oubli.
 
-La bibliothèque reste gratuite, dans les limites techniques de 1 000 éléments et 200 000 octets par compte. Un export JSON est disponible dans les réglages. L’effacement d’une bibliothèque en mode connecté se synchronise également sur les autres appareils.
+Pendant la préparation, l’accès à la bibliothèque reste inchangé, dans les limites techniques de 1 000 éléments et 200 000 octets par compte. Un export JSON est disponible dans les réglages. L’effacement d’une bibliothèque en mode connecté se synchronise également sur les autres appareils.
+
+## Gratuit avec publicités et Premium : préparation
+
+La page présente le modèle à venir, sans prix ni bouton d’achat. Le gabarit publicitaire est inerte : aucune publicité, aucun traceur ni fournisseur n’est ajouté. `product-policy.json` consigne les décisions produit ; ce fichier public n’accorde aucun droit et ne contrôle pas l’API. Aucun accès, stockage, schéma D1, quota ou endpoint du Worker n’est changé par cette préparation.
+
+Avant activation, faire choisir au propriétaire :
+
+- Prix, devise, périodicité et prestataire de paiement ; aucune souscription tierce sans autorisation.
+- Fournisseur publicitaire, formats et modalités de consentement/confidentialité avant d’intégrer son code.
+- Traitement des utilisateurs et données existants : maintien des droits acquis ou autre transition explicitement validée, sans effacement ni modification des favoris et collections existants.
+- Statut des liens hors collection, et présence ou absence de publicités en Premium (non décidés).
+
+L’activation nécessitera des droits Premium vérifiés côté serveur (jamais depuis un booléen local), la validation des événements de paiement, une stratégie d’expiration et des tests anti-contournement sur la sauvegarde/importation/synchronisation. L’export et la suppression du compte doivent rester accessibles sans Premium. Ne pas activer un verrouillage uniquement dans l’interface.
 
 ## Google : activation restante
 
