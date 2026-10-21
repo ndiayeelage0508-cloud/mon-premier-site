@@ -135,7 +135,6 @@ function renderSaved() {
       row.innerHTML = `<div class="saved-item-main"><div class="saved-item-title">Prompt ${escapeHTML(item.mode === "optimize" ? "optimisé" : "généré")}</div><div class="saved-item-sub">${escapeHTML(item.text.slice(0,180))}${item.text.length>180?"…":""}</div></div><div class="saved-item-actions"><button data-action="copy-fav" data-id="${escapeHTML(item.id)}">Copier</button><button data-action="delete-fav" data-id="${escapeHTML(item.id)}">×</button></div>`;
       list.appendChild(row);
     });
-    $("emptyLinks").hidden = state.data.favorites.length > 0;
   }
 }
 function openView(view) {
