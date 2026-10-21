@@ -1,129 +1,348 @@
 <!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffd21c">
-  <meta name="description" content="PromptLab — crée, optimise et sauvegarde tes prompts et tes liens.">
-  <title>PromptLab — Save, create, find.</title>
-  <link rel="stylesheet" href="./styles.css?v=20261021-2">
-</head>
-<body>
-  <div class="backdrop-shape shape-pink"></div>
-  <div class="backdrop-shape shape-purple"></div>
-  <header class="topbar">
-    <a class="brand" href="#" aria-label="PromptLab accueil"><span class="brand-mark">P</span><span>PromptLab</span></a>
-    <nav class="top-actions" aria-label="Actions rapides">
-      <button class="icon-btn" id="settingsBtn" title="Réglages" aria-label="Réglages">⚙</button>
-      <button class="icon-btn" id="searchBtn" title="Rechercher" aria-label="Rechercher">⌕</button>
-    </nav>
-  </header>
-
-  <main class="app-shell">
-    <section class="hero">
-      <p class="eyebrow">TON ESPACE DE CRÉATION</p>
-      <h1>Save now.<br>Find anytime.</h1>
-      <p class="hero-copy">Crée de meilleurs prompts. Garde tes idées. Retrouve tes liens.</p>
-    </section>
-
-    <section class="quick-save panel">
-      <label class="sr-only" for="quickInput">Colle un lien ou saisis une idée</label>
-      <span class="input-symbol">↗</span>
-      <input id="quickInput" type="text" placeholder="Colle un lien ou note une idée…" autocomplete="off">
-      <button id="quickAddBtn" class="plus-btn" aria-label="Enregistrer">+</button>
-    </section>
-
-    <section class="workspace">
-      <div class="section-heading">
-        <div><p class="eyebrow">WORKSPACE</p><h2>Mon espace</h2></div>
-        <span class="count-pill" id="totalCount">0 éléments</span>
-      </div>
-      <div class="collection-grid">
-        <button class="collection-card" data-view="generate">
-          <span class="card-tab tab-yellow"></span><span class="collection-icon icon-yellow">✦</span>
-          <span class="collection-meta">IA · CRÉATION</span><strong>Prompt Studio</strong><span class="card-desc">Génère un prompt à partir d’une idée</span><span class="card-arrow">↗</span>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffd21c" />
+    <meta
+      name="description"
+      content="PromptLab — crée, optimise et sauvegarde tes prompts et tes liens."
+    />
+    <title>PromptLab — Save, create, find.</title>
+    <link rel="stylesheet" href="./styles.css?v=20261021-3" />
+  </head>
+  <body>
+    <div class="backdrop-shape shape-pink"></div>
+    <div class="backdrop-shape shape-purple"></div>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="PromptLab accueil"
+        ><span class="brand-mark">P</span><span>PromptLab</span></a
+      >
+      <nav class="top-actions" aria-label="Actions rapides">
+        <button
+          class="icon-btn"
+          id="accountBtn"
+          title="Compte"
+          aria-label="Compte"
+        >
+          ♙
         </button>
-        <button class="collection-card" data-view="optimize">
-          <span class="card-tab tab-green"></span><span class="collection-icon icon-green">⚡</span>
-          <span class="collection-meta">IA · AMÉLIORATION</span><strong>Optimiseur</strong><span class="card-desc">Rends tes instructions plus précises</span><span class="card-arrow">↗</span>
+        <button
+          class="icon-btn"
+          id="settingsBtn"
+          title="Réglages"
+          aria-label="Réglages"
+        >
+          ⚙
         </button>
-        <button class="collection-card" data-view="favorites">
-          <span class="card-tab tab-pink"></span><span class="collection-icon icon-pink">♥</span>
-          <span class="collection-meta">BIBLIOTHÈQUE</span><strong>Prompts favoris</strong><span class="card-desc"><span id="favoriteCount">0</span> prompts sauvegardés</span><span class="card-arrow">↗</span>
+        <button
+          class="icon-btn"
+          id="searchBtn"
+          title="Rechercher"
+          aria-label="Rechercher"
+        >
+          ⌕
         </button>
-        <button class="collection-card" data-view="links">
-          <span class="card-tab tab-purple"></span><span class="collection-icon icon-purple">↗</span>
-          <span class="collection-meta">COLLECTIONS</span><strong>Mes liens</strong><span class="card-desc"><span id="linkCount">0</span> liens enregistrés</span><span class="card-arrow">↗</span>
-        </button>
-      </div>
-    </section>
+      </nav>
+    </header>
 
-    <section class="tool-panel panel" id="toolPanel">
-      <div class="section-heading compact">
-        <div><p class="eyebrow" id="toolEyebrow">PROMPT STUDIO</p><h2 id="toolTitle">Transforme ton idée</h2></div>
-        <span class="ai-badge"><span class="status-dot"></span> IA</span>
-      </div>
-      <div class="mode-switch" role="group" aria-label="Mode IA">
-        <button class="mode-btn active" data-mode="generate">Générer</button>
-        <button class="mode-btn" data-mode="optimize">Optimiser</button>
-      </div>
-      <label for="promptInput" id="promptLabel">Quelle idée veux-tu transformer en prompt ?</label>
-      <textarea id="promptInput" rows="4" placeholder="Ex. : Aide-moi à apprendre les maths en Première S…"></textarea>
-      <div class="tool-controls">
-        <span class="helper-text">Évite d’inclure des informations personnelles sensibles.</span>
-        <button class="primary-btn" id="runAiBtn"><span>✦</span> <span id="runBtnText">Générer mon prompt</span></button>
-      </div>
-      <div class="result-wrap" id="resultWrap" hidden>
-        <div class="result-heading"><strong>Résultat</strong><div class="result-actions"><button class="small-btn" id="copyResultBtn">Copier</button><button class="small-btn favorite-btn" id="saveFavoriteBtn">♡ Favori</button></div></div>
-        <div id="resultText" class="result-text" aria-live="polite"></div>
-      </div>
-      <p class="notice" id="statusMessage" role="status"></p>
-    </section>
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">TON ESPACE DE CRÉATION</p>
+        <h1>Save now.<br />Find anytime.</h1>
+        <p class="hero-copy">
+          Crée de meilleurs prompts. Garde tes idées. Retrouve tes liens.
+        </p>
+      </section>
 
-    <section class="links-panel panel" id="linksPanel">
-      <div class="section-heading compact">
-        <div><p class="eyebrow">TA BIBLIOTHÈQUE</p><h2>Mes collections</h2></div>
-        <button class="outline-btn" id="addCollectionBtn">+ Collection</button>
-      </div>
-      <div class="collection-filters" id="collectionFilters">
-        <button class="filter-chip active" data-filter="all">Tout</button>
-        <button class="filter-chip" data-filter="unsorted">Sans dossier</button>
-        <button class="filter-chip" data-filter="learning">Études</button>
-        <button class="filter-chip" data-filter="watch">À voir</button>
-        <button class="filter-chip" data-filter="favorites">Favoris</button>
-      </div>
-      <form id="linkForm" class="link-form">
-        <label class="sr-only" for="linkTitle">Titre du lien (facultatif)</label>
-        <input id="linkTitle" type="text" placeholder="Nom du lien (facultatif)">
-        <label class="sr-only" for="linkUrl">Adresse du lien</label>
-        <input id="linkUrl" type="url" placeholder="https://…" required>
-        <select id="linkCollection" aria-label="Collection">
-          <option value="unsorted">Sans dossier</option>
-          <option value="learning">Études & recherche</option>
-          <option value="watch">À voir</option>
-          <option value="favorites">Favoris</option>
-        </select>
-        <button class="primary-btn" type="submit">Enregistrer le lien</button>
+      <section class="quick-save panel">
+        <label class="sr-only" for="quickInput"
+          >Colle un lien ou saisis une idée</label
+        >
+        <span class="input-symbol">↗</span>
+        <input
+          id="quickInput"
+          type="text"
+          placeholder="Colle un lien ou note une idée…"
+          autocomplete="off"
+        />
+        <button id="quickAddBtn" class="plus-btn" aria-label="Enregistrer">
+          +
+        </button>
+      </section>
+
+      <section class="workspace">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">WORKSPACE</p>
+            <h2>Mon espace</h2>
+          </div>
+          <span class="count-pill" id="totalCount">0 éléments</span>
+        </div>
+        <div class="collection-grid">
+          <button class="collection-card" data-view="generate">
+            <span class="card-tab tab-yellow"></span
+            ><span class="collection-icon icon-yellow">✦</span>
+            <span class="collection-meta">IA · CRÉATION</span
+            ><strong>Prompt Studio</strong
+            ><span class="card-desc">Génère un prompt à partir d’une idée</span
+            ><span class="card-arrow">↗</span>
+          </button>
+          <button class="collection-card" data-view="optimize">
+            <span class="card-tab tab-green"></span
+            ><span class="collection-icon icon-green">⚡</span>
+            <span class="collection-meta">IA · AMÉLIORATION</span
+            ><strong>Optimiseur</strong
+            ><span class="card-desc">Rends tes instructions plus précises</span
+            ><span class="card-arrow">↗</span>
+          </button>
+          <button class="collection-card" data-view="favorites">
+            <span class="card-tab tab-pink"></span
+            ><span class="collection-icon icon-pink">♥</span>
+            <span class="collection-meta">BIBLIOTHÈQUE</span
+            ><strong>Prompts favoris</strong
+            ><span class="card-desc"
+              ><span id="favoriteCount">0</span> prompts sauvegardés</span
+            ><span class="card-arrow">↗</span>
+          </button>
+          <button class="collection-card" data-view="links">
+            <span class="card-tab tab-purple"></span
+            ><span class="collection-icon icon-purple">↗</span>
+            <span class="collection-meta">COLLECTIONS</span
+            ><strong>Mes liens</strong
+            ><span class="card-desc"
+              ><span id="linkCount">0</span> liens enregistrés</span
+            ><span class="card-arrow">↗</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="tool-panel panel" id="toolPanel">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow" id="toolEyebrow">PROMPT STUDIO</p>
+            <h2 id="toolTitle">Transforme ton idée</h2>
+          </div>
+          <span class="ai-badge"><span class="status-dot"></span> IA</span>
+        </div>
+        <div class="mode-switch" role="group" aria-label="Mode IA">
+          <button class="mode-btn active" data-mode="generate">Générer</button>
+          <button class="mode-btn" data-mode="optimize">Optimiser</button>
+        </div>
+        <label for="promptInput" id="promptLabel"
+          >Quelle idée veux-tu transformer en prompt ?</label
+        >
+        <textarea
+          id="promptInput"
+          rows="4"
+          placeholder="Ex. : Aide-moi à apprendre les maths en Première S…"
+        ></textarea>
+        <div class="tool-controls">
+          <span class="helper-text"
+            >Évite d’inclure des informations personnelles sensibles.</span
+          >
+          <button class="primary-btn" id="runAiBtn">
+            <span>✦</span> <span id="runBtnText">Générer mon prompt</span>
+          </button>
+        </div>
+        <div class="result-wrap" id="resultWrap" hidden>
+          <div class="result-heading">
+            <strong>Résultat</strong>
+            <div class="result-actions">
+              <button class="small-btn" id="copyResultBtn">Copier</button
+              ><button class="small-btn favorite-btn" id="saveFavoriteBtn">
+                ♡ Favori
+              </button>
+            </div>
+          </div>
+          <div id="resultText" class="result-text" aria-live="polite"></div>
+        </div>
+        <p class="notice" id="statusMessage" role="status"></p>
+        <p class="sync-status" id="syncStatus" role="status">hors connexion</p>
+      </section>
+
+      <section class="links-panel panel" id="linksPanel">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">TA BIBLIOTHÈQUE</p>
+            <h2>Mes collections</h2>
+          </div>
+          <button class="outline-btn" id="addCollectionBtn">
+            + Collection
+          </button>
+        </div>
+        <div class="collection-filters" id="collectionFilters">
+          <button class="filter-chip active" data-filter="all">Tout</button>
+          <button class="filter-chip" data-filter="unsorted">
+            Sans dossier
+          </button>
+          <button class="filter-chip" data-filter="learning">Études</button>
+          <button class="filter-chip" data-filter="watch">À voir</button>
+          <button class="filter-chip" data-filter="favorites">Favoris</button>
+        </div>
+        <form id="linkForm" class="link-form">
+          <label class="sr-only" for="linkTitle"
+            >Titre du lien (facultatif)</label
+          >
+          <input
+            id="linkTitle"
+            type="text"
+            placeholder="Nom du lien (facultatif)"
+          />
+          <label class="sr-only" for="linkUrl">Adresse du lien</label>
+          <input id="linkUrl" type="url" placeholder="https://…" required />
+          <select id="linkCollection" aria-label="Collection">
+            <option value="unsorted">Sans dossier</option>
+            <option value="learning">Études & recherche</option>
+            <option value="watch">À voir</option>
+            <option value="favorites">Favoris</option>
+          </select>
+          <button class="primary-btn" type="submit">Enregistrer le lien</button>
+        </form>
+        <div class="saved-list" id="savedList"></div>
+        <p class="empty-state" id="emptyLinks">
+          Tes liens enregistrés apparaîtront ici.
+        </p>
+      </section>
+      <footer>
+        <span class="brand-mini">P</span> PromptLab <span>·</span> Tes idées,
+        bien rangées.
+      </footer>
+    </main>
+
+    <dialog id="settingsDialog" class="settings-dialog">
+      <form method="dialog">
+        <button class="dialog-close" aria-label="Fermer">×</button>
       </form>
-      <div class="saved-list" id="savedList"></div>
-      <p class="empty-state" id="emptyLinks">Tes liens enregistrés apparaîtront ici.</p>
-    </section>
-    <footer><span class="brand-mini">P</span> PromptLab <span>·</span> Tes idées, bien rangées.</footer>
-  </main>
-
-  <dialog id="settingsDialog" class="settings-dialog">
-    <form method="dialog"><button class="dialog-close" aria-label="Fermer">×</button></form>
-    <p class="eyebrow">PRÉFÉRENCES</p><h2>Ton espace, ton rythme.</h2>
-    <p>Les favoris et les liens sont enregistrés localement dans ce navigateur. Ils ne sont pas synchronisés entre appareils.</p>
-    <button id="exportDataBtn" class="outline-btn">Exporter mes données</button>
-    <button id="clearDataBtn" class="danger-btn">Effacer les données locales</button>
-  </dialog>
-  <dialog id="searchDialog" class="settings-dialog">
-    <form method="dialog"><button class="dialog-close" aria-label="Fermer">×</button></form>
-    <p class="eyebrow">RECHERCHE</p><h2>Retrouve une idée ou un lien</h2>
-    <input id="searchInput" type="search" placeholder="Rechercher…">
-    <div id="searchResults" class="saved-list"></div>
-  </dialog>
-  <script src="./app.js?v=20261021-2"></script>
-</body>
+      <p class="eyebrow">PRÉFÉRENCES</p>
+      <h2>Ton espace, ton rythme.</h2>
+      <p>
+        Les favoris et les liens sont enregistrés localement dans ce navigateur.
+        Connecte-toi pour les synchroniser entre appareils.
+      </p>
+      <button id="importAnonBtn" class="outline-btn">
+        Importer les données anonymes
+      </button>
+      <button id="exportDataBtn" class="outline-btn">
+        Exporter mes données
+      </button>
+      <button id="clearDataBtn" class="danger-btn">
+        Effacer les données locales
+      </button>
+    </dialog>
+    <dialog id="accountDialog" class="settings-dialog account-dialog">
+      <form method="dialog">
+        <button class="dialog-close" aria-label="Fermer">×</button>
+      </form>
+      <p class="eyebrow">COMPTE PROMPTLAB</p>
+      <h2 id="accountTitle">Synchronise ton espace.</h2>
+      <p id="accountIntro">
+        Crée un compte gratuit pour retrouver tes favoris, liens et collections.
+        La connexion par e-mail fonctionne sans e-mail de validation. Conserve
+        ton code de récupération.
+      </p>
+      <div id="accountLoggedOut">
+        <div class="account-tabs">
+          <button
+            type="button"
+            class="filter-chip active"
+            data-account-mode="login"
+          >
+            Connexion</button
+          ><button
+            type="button"
+            class="filter-chip"
+            data-account-mode="register"
+          >
+            Inscription
+          </button>
+        </div>
+        <form id="accountForm" class="account-form">
+          <label for="accountEmail">Email</label
+          ><input
+            id="accountEmail"
+            type="email"
+            autocomplete="email"
+            required
+          /><label for="accountPassword">Mot de passe</label
+          ><input
+            id="accountPassword"
+            type="password"
+            minlength="12"
+            maxlength="128"
+            autocomplete="current-password"
+            required
+          /><button class="primary-btn" type="submit" id="accountSubmit">
+            Se connecter
+          </button>
+        </form>
+        <button
+          id="googleBtn"
+          class="outline-btn google-btn"
+          type="button"
+          disabled
+        >
+          Continuer avec Google
+        </button>
+        <div id="googleButtonContainer"></div>
+        <p class="helper-text" id="googleMessage">
+          Google sera activé lorsque la configuration sera disponible.
+        </p>
+        <button id="recoverBtn" class="text-btn" type="button">
+          Récupérer mon compte avec un code
+        </button>
+        <div id="recoveryBox" hidden>
+          <p class="notice">
+            Saisis l’email, ton code de récupération et un nouveau mot de passe.
+            Le code n’est pas envoyé par email.
+          </p>
+          <form id="recoveryForm" class="account-form">
+            <input
+              id="recoveryCode"
+              inputmode="text"
+              pattern="[0-9a-fA-F]{16,}"
+              placeholder="Code de récupération hexadécimal"
+              required
+            /><input
+              id="recoveryPassword"
+              type="password"
+              minlength="12"
+              maxlength="128"
+              placeholder="Nouveau mot de passe"
+              required
+            /><button class="primary-btn">Réinitialiser le mot de passe</button>
+          </form>
+        </div>
+      </div>
+      <div id="accountLoggedIn" hidden>
+        <p>Connecté en tant que <strong id="accountEmailLabel"></strong>.</p>
+        <p class="helper-text">
+          Les changements sont synchronisés automatiquement, quand la connexion
+          est disponible.
+        </p>
+        <button id="logoutBtn" class="outline-btn" type="button">
+          Se déconnecter
+        </button>
+      </div>
+      <div id="recoveryOnce" class="recovery-once" hidden>
+        <strong>Code de récupération — à conserver maintenant</strong
+        ><code id="recoveryCodeLabel"></code>
+        <p>
+          Ce code est affiché une seule fois. Garde-le dans un endroit sûr :
+          aucun service email n’est utilisé.
+        </p>
+      </div>
+      <p class="notice" id="accountStatus" role="status"></p>
+    </dialog>
+    <dialog id="searchDialog" class="settings-dialog">
+      <form method="dialog">
+        <button class="dialog-close" aria-label="Fermer">×</button>
+      </form>
+      <p class="eyebrow">RECHERCHE</p>
+      <h2>Retrouve une idée ou un lien</h2>
+      <input id="searchInput" type="search" placeholder="Rechercher…" />
+      <div id="searchResults" class="saved-list"></div>
+    </dialog>
+    <script src="./app.js?v=20261021-3"></script>
+  </body>
 </html>
