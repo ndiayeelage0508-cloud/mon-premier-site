@@ -28,6 +28,16 @@ Favoris, liens et collections personnalisées sont synchronisés par compte, ave
 
 Le bouton d’effacement s’applique à la bibliothèque active : connecté, cette suppression se synchronise également au compte. Exporter avant toute suppression importante.
 
+## Suppression complète du compte
+
+`POST /api/auth/delete` exige l’origine autorisée, un jeton Bearer valide et un corps JSON avec `confirmation` strictement égal à `SUPPRIMER`. L’interface exige la saisie de ce mot et bloque la synchronisation pendant l’opération.
+
+Un batch transactionnel D1 supprime le compte (dont les dérivés du mot de passe et du code de récupération), sa bibliothèque, toutes ses sessions et les compteurs `library:<id>`. Le compteur `email:<hash>` n’est retiré que si aucun autre compte ne partage cette adresse normalisée. `free_usage`, les compteurs globaux/IP `auth:*` et `register:*` et les autres comptes ne sont pas effacés. Les clés étrangères empêchent la recréation de sessions ou de bibliothèque orphelines après une suppression concurrente.
+
+Après succès, le navigateur utilisé efface le cache et la base de synchronisation de ce compte ainsi que sa session locale. Les données anonymes, autres comptes, caches sur d’autres appareils et exports restent hors de cet effacement. Les sauvegardes et journaux d’infrastructure ne sont pas purgés par cette route ; leurs durées doivent être confirmées séparément. Une nouvelle connexion Google peut créer un nouveau compte vide, sans restaurer l’ancien.
+
+Tests reproductibles à la racine avec Node 22.13+ : `npm ci && npm test`. Ils utilisent SQLite en mémoire et JSDOM, sans réseau ni comptes réels.
+
 ## Déploiement
 
 Conserver ensemble `worker.js`, `wrangler.toml`, `schema.sql` et `accounts-schema.sql`. Sur un environnement neuf, appliquer les deux schémas. Sur l’environnement existant, appliquer uniquement la migration additive des comptes si nécessaire, puis mettre à jour le Worker en conservant ses bindings et variables. Ne pas réinitialiser les compteurs de quotas.

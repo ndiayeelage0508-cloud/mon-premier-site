@@ -718,3 +718,20 @@ footer {
 .account-local-actions {
   margin-top: 8px;
 }
+.account-delete {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 20px;
+  background: #fff0f3;
+}
+.account-delete h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+.account-delete p {
+  margin-top: 7px;
+}
+.account-delete .danger-btn {
+  width: 100%;
+}

@@ -135,11 +135,30 @@ async function authBody(request, max = 16384) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) authError(400, 'Objet JSON requis.');
   return body;
 }
-async function throttle(db, key, limit, windowMs) {
+async function throttle(db, key, limit, windowMs, userId = null) {
   const now = Date.now(); const bucket = Math.floor(now / windowMs);
-  const row = await db.prepare(`INSERT INTO auth_limits (key, bucket, count, expires_at) VALUES (?, ?, 1, ?)
-    ON CONFLICT(key, bucket) DO UPDATE SET count = count + 1 WHERE count < ? RETURNING count`).bind(key, bucket, (bucket + 1) * windowMs, limit).first();
+  const statement = userId
+    ? `INSERT INTO auth_limits (key, bucket, count, expires_at)
+       SELECT ?, ?, 1, ? WHERE EXISTS (SELECT 1 FROM account_users WHERE id=? )
+       ON CONFLICT(key, bucket) DO UPDATE SET count = count + 1 WHERE count < ? RETURNING count`
+    : `INSERT INTO auth_limits (key, bucket, count, expires_at) VALUES (?, ?, 1, ?)
+       ON CONFLICT(key, bucket) DO UPDATE SET count = count + 1 WHERE count < ? RETURNING count`;
+  const row = userId
+    ? await db.prepare(statement).bind(key, bucket, (bucket + 1) * windowMs, userId, limit).first()
+    : await db.prepare(statement).bind(key, bucket, (bucket + 1) * windowMs, limit).first();
   if (!row) authError(429, 'Trop de tentatives. Réessaie plus tard.');
+}
+async function deleteAccount(db, user) {
+  const emailHash = await digest(user.email.trim().toLowerCase());
+  // D1 batch is one atomic transaction. The conditional email counter survives
+  // when another provider/account still owns the same normalized email.
+  return db.batch([
+    db.prepare('DELETE FROM account_sessions WHERE user_id=?').bind(user.id),
+    db.prepare('DELETE FROM account_libraries WHERE user_id=?').bind(user.id),
+    db.prepare('DELETE FROM account_users WHERE id=?').bind(user.id),
+    db.prepare("DELETE FROM auth_limits WHERE key=?").bind('library:' + user.id),
+    db.prepare("DELETE FROM auth_limits WHERE key=? AND NOT EXISTS (SELECT 1 FROM account_users WHERE lower(email)=? AND id<>?)").bind('email:' + emailHash, user.email.trim().toLowerCase(), user.id)
+  ]);
 }
 async function issueSession(db, user) {
   const token = randomSecret(); const now = Date.now();
@@ -202,7 +221,7 @@ async function accountsRoute(request, env, ctx, url, origin) {
   const path = url.pathname;
   if (!path.startsWith('/api/auth/') && path !== '/api/library') return null;
   if (origin !== ALLOWED_ORIGIN) return json({ error: 'Origine non autorisée.' }, 403, origin);
-  const methods = { '/api/auth/config':'GET', '/api/auth/me':'GET', '/api/auth/register':'POST', '/api/auth/login':'POST', '/api/auth/google':'POST', '/api/auth/recover':'POST', '/api/auth/logout':'POST', '/api/library':'GET, POST' };
+  const methods = { '/api/auth/config':'GET', '/api/auth/me':'GET', '/api/auth/register':'POST', '/api/auth/login':'POST', '/api/auth/google':'POST', '/api/auth/recover':'POST', '/api/auth/logout':'POST', '/api/auth/delete':'POST', '/api/library':'GET, POST' };
   if (!methods[path]) return json({ error: 'Route introuvable.' }, 404, origin);
   if (!methods[path].split(', ').includes(request.method)) return json({ error: 'Méthode non autorisée.' }, 405, origin, { Allow: methods[path] + ', OPTIONS' });
   if (path === '/api/auth/config') return json({ googleClientId: env.GOOGLE_CLIENT_ID || null, emailPassword: true, emailVerification: false, recovery: 'code', libraryFree: true }, 200, origin);
@@ -210,11 +229,17 @@ async function accountsRoute(request, env, ctx, url, origin) {
   if (!db) return json({ error: 'Comptes temporairement indisponibles.' }, 503, origin);
   try {
     const ip = request.headers.get('CF-Connecting-IP'); if (!ip) authError(503, 'Identification réseau indisponible.');
-    if (path === '/api/library' || path === '/api/auth/me' || path === '/api/auth/logout') {
+    if (path === '/api/library' || path === '/api/auth/me' || path === '/api/auth/logout' || path === '/api/auth/delete') {
       const user = await sessionUser(request, db);
       if (path === '/api/auth/me') return json({ user: publicUser(user) }, 200, origin);
+      if (path === '/api/auth/delete') {
+        const body = await authBody(request, 1024);
+        if (body.confirmation !== 'SUPPRIMER') authError(400, 'Confirmation exacte SUPPRIMER requise.');
+        await deleteAccount(db, user);
+        return json({ ok: true }, 200, origin);
+      }
       if (path === '/api/auth/logout') { await db.prepare('DELETE FROM account_sessions WHERE token_hash=?').bind(user.tokenHash).run(); return json({ ok: true }, 200, origin); }
-      await throttle(db, 'library:' + user.id, 120, 60000);
+      await throttle(db, 'library:' + user.id, 120, 60000, user.id);
       const current = async () => await db.prepare('SELECT data,revision FROM account_libraries WHERE user_id=?').bind(user.id).first();
       if (request.method === 'GET') { const row = await current(); return json({ data: row ? JSON.parse(row.data) : EMPTY_LIBRARY, revision: row?.revision || 0 }, 200, origin); }
       const body = await authBody(request, 210000);

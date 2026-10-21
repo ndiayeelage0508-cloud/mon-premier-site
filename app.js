@@ -30,6 +30,7 @@ const state = {
   accountMode: "login",
   googleNonce: null,
   aiController: null,
+  deleting: false,
 };
 const apiPath = (p) => `${API_BASE.replace(/\/$/, "")}${p}`;
 const uid = () => `${Date.now()}-${cryptoRandom()}`;
@@ -503,10 +504,11 @@ function isDirty(local = state.data, base = state.baseRemote) {
   return JSON.stringify(local) !== JSON.stringify(base || blank());
 }
 async function pullLibrary(token = state.token, accountId = state.user?.id) {
+  if (state.deleting) return;
   const response = await authFetch("/api/library", {}, token);
   if (!response.ok) throw Error("Bibliothèque indisponible");
   const payload = await response.json();
-  if (token !== state.token || accountId !== state.user?.id) return;
+  if (state.deleting || token !== state.token || accountId !== state.user?.id) return;
   const remote = normalizeData(payload.data);
   // Merge against the OLD base before advancing it: otherwise offline removals
   // and remote additions would be interpreted as new local deletions.
@@ -546,18 +548,18 @@ function mergeData(local, base, remote) {
   };
 }
 function queueSync(delay = 700) {
-  if (!state.token) return;
+  if (!state.token || state.deleting) return;
   state.queued = true;
   syncStatus("Synchronisation en attente", false);
   clearTimeout(state.syncTimer);
   state.syncTimer = setTimeout(syncLibrary, delay);
 }
 async function syncLibrary() {
-  if (!state.token || state.syncBusy || !state.queued) return;
+  if (state.deleting || !state.token || state.syncBusy || !state.queued) return;
   const token = state.token,
     accountId = state.user?.id;
   const stillCurrent = () =>
-    token === state.token && accountId === state.user?.id;
+    !state.deleting && token === state.token && accountId === state.user?.id;
   state.syncBusy = true;
   state.queued = false;
   let failed = false;
@@ -631,7 +633,7 @@ async function syncLibrary() {
     }
   } finally {
     state.syncBusy = false;
-    if (state.token && state.queued) {
+    if (!state.deleting && state.token && state.queued) {
       clearTimeout(state.syncTimer);
       const delay = failed
         ? Math.min(60000, 1500 * 2 ** (state.syncFailures || 0))
@@ -639,6 +641,49 @@ async function syncLibrary() {
       state.syncTimer = setTimeout(syncLibrary, delay);
     }
   }
+}
+async function deleteAccount() {
+  if (!state.token || !state.user || state.deleting) return;
+  const token = state.token;
+  const accountId = state.user.id;
+  const confirmation = $("deleteConfirmation").value;
+  if (confirmation !== "SUPPRIMER") {
+    accountMsg("Écris exactement SUPPRIMER pour confirmer.", true);
+    $("deleteConfirmation").focus();
+    return;
+  }
+  state.deleting = true;
+  clearTimeout(state.syncTimer);
+  state.queued = false;
+  const button = $("deleteAccountBtn");
+  button.disabled = true;
+  accountMsg("Suppression du compte en cours…");
+  try {
+    const response = await authFetch("/api/auth/delete", {
+      method: "POST",
+      body: JSON.stringify({ confirmation: "SUPPRIMER" }),
+    }, token);
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw Error(result.error || "Suppression impossible");
+    // Remove only this account's local records; anonymous data remains intact.
+    try {
+      localStorage.removeItem(CACHE_PREFIX + accountId);
+      localStorage.removeItem(BASE_PREFIX + accountId);
+    } catch {}
+    await endSession(false, token);
+    $("accountDialog").close();
+    showStatus("Compte supprimé. Tes données anonymes sont conservées.");
+  } catch (error) {
+    state.deleting = false;
+    button.disabled = $("deleteConfirmation").value !== "SUPPRIMER";
+    accountMsg(error.message || "Suppression impossible.", true);
+  }
+}
+function resetDeleteConfirmation() {
+  const input = $("deleteConfirmation");
+  const button = $("deleteAccountBtn");
+  if (input) input.value = "";
+  if (button) button.disabled = true;
 }
 async function endSession(callServer = true, captured = state.token) {
   const oldToken = captured;
@@ -652,8 +697,10 @@ async function endSession(callServer = true, captured = state.token) {
   state.user = null;
   state.baseRemote = null;
   state.queued = false;
+  state.deleting = false;
   clearTimeout(state.syncTimer);
   clearRecovery();
+  resetDeleteConfirmation();
   $("accountPassword").value = "";
   $("recoveryCode").value = "";
   $("recoveryPassword").value = "";
@@ -702,6 +749,7 @@ async function submitAccount(e) {
       d = await r.json().catch(() => ({}));
     if (!r.ok) throw Error(d.error || "Authentification impossible");
     clearRecovery();
+    resetDeleteConfirmation();
     setToken(d.token, d.user);
     state.data = loadCache(cacheKey());
     state.baseRemote = loadBase();
@@ -778,6 +826,7 @@ async function setupGoogle() {
               x = await r.json();
             if (!r.ok) throw Error(x.error || "Connexion Google impossible");
             clearRecovery();
+            resetDeleteConfirmation();
             setToken(x.token, x.user);
             state.data = loadCache(cacheKey());
             state.baseRemote = loadBase();
@@ -924,6 +973,10 @@ $("recoverBtn").addEventListener(
   () => ($("recoveryBox").hidden = !$("recoveryBox").hidden),
 );
 $("logoutBtn").addEventListener("click", () => endSession(true));
+$("deleteAccountBtn").addEventListener("click", deleteAccount);
+$("deleteConfirmation").addEventListener("input", (e) => {
+  $("deleteAccountBtn").disabled = e.target.value !== "SUPPRIMER";
+});
 $("importAnonBtn").addEventListener("click", importAnon);
 document.querySelectorAll("[data-account-mode]").forEach((b) =>
   b.addEventListener("click", () => {
@@ -968,10 +1021,10 @@ $("addCollectionBtn").addEventListener("click", () => {
   else if (name) showStatus("Le nom doit contenir 1 à 120 caractères.", true);
 });
 window.addEventListener("focus", () => {
-  if (state.token) queueSync(100);
+  if (state.token && !state.deleting) queueSync(100);
 });
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && state.token) queueSync(100);
+  if (!document.hidden && state.token && !state.deleting) queueSync(100);
 });
 state.data = loadCache(ANON_KEY);
 updateCounts();
@@ -1010,5 +1063,5 @@ function renderCollections() {
     select.value = selected;
 }
 window.addEventListener("online", () => {
-  if (state.token) queueSync(100);
+  if (state.token && !state.deleting) queueSync(100);
 });
