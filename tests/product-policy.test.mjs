@@ -5,6 +5,7 @@ import { JSDOM } from 'jsdom';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
+const pricing = fs.readFileSync(new URL('../regional-pricing.js', import.meta.url), 'utf8');
 const policy = JSON.parse(fs.readFileSync(new URL('../product-policy.json', import.meta.url)));
 const existing = {
   favorites: [{ id: 'old-fav', text: 'Mon ancien prompt', mode: 'generate', createdAt: '2026-01-01' }],
@@ -24,6 +25,7 @@ function boot() {
     return { ok: true, json: async () => ({ googleClientId: null }) };
   };
   window.eval(app + '\nwindow.testSaveFavorite = () => { state.lastResult = "Nouveau favori"; saveFavorite(); };');
+  window.eval(pricing);
   return { dom, window, calls };
 }
 
@@ -37,7 +39,7 @@ test('target policy records the user decision without activating billing, ads or
   assert.equal(policy.safeguards.preserveCurrentAccess, true);
 });
 
-test('offer dialog opens, explicitly announces preparation and has no purchase controls', () => {
+test('offer dialog opens and keeps its informational purchase preview disabled', () => {
   const { dom, window } = boot();
   window.document.getElementById('plansBtn').click();
   const dialog = window.document.getElementById('plansDialog');
@@ -45,9 +47,12 @@ test('offer dialog opens, explicitly announces preparation and has no purchase c
   assert.match(dialog.textContent, /Aucune offre Premium n’est encore en vente/);
   assert.match(dialog.textContent, /favoris et les collections seront réservés au Premium/);
   assert.match(dialog.textContent, /les accès restent inchangés/);
-  assert.equal(dialog.querySelectorAll('a, input, select').length, 0);
-  assert.equal(dialog.querySelectorAll('button').length, 1); // close only
-  assert.doesNotMatch(dialog.textContent, /[€$£]|sans publicités/);
+  assert.equal(dialog.querySelectorAll('a, input:not([type="radio"])').length, 0);
+  assert.equal(dialog.querySelectorAll('select').length, 1);
+  assert.equal(dialog.querySelectorAll('button').length, 2); // close + disabled preview
+  assert.equal(dialog.querySelector('.cta').disabled, true);
+  assert.match(dialog.querySelector('.cta').textContent, /bientôt disponible/);
+  assert.match(dialog.textContent, /Aucune publicité/);
   dom.window.close();
 });
 
@@ -57,7 +62,7 @@ test('ad slot is inert and boot makes no new third-party network call', () => {
   assert.equal(template.tagName, 'TEMPLATE');
   assert.equal(template.content.querySelectorAll('.ad-slot').length, 1);
   assert.equal(window.document.querySelectorAll('.ad-slot, iframe').length, 0);
-  assert.deepEqual([...window.document.scripts].map(s => s.getAttribute('src')), ['./app.js?v=20261021-4']);
+  assert.deepEqual([...window.document.scripts].map(s => s.getAttribute('src')), ['./app.js?v=20261021-4', './regional-pricing.js?v=20261021-5']);
   assert.equal(calls.length, 1);
   assert.equal(new URL(calls[0]).pathname, '/api/auth/config');
   dom.window.close();

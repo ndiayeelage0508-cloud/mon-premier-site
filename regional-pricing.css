@@ -1,0 +1,90 @@
+/* Display-only offer preview. All rules are scoped to the existing offer dialog. */
+#plansDialog {
+  width: min(750px, calc(100% - 24px));
+  max-width: 750px;
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow: auto;
+  padding: 26px 30px;
+  background: var(--yellow);
+  overscroll-behavior: contain;
+}
+#plansDialog .pricing-intro { margin: 18px 0 22px; }
+#plansDialog p.pricing-headline { font-size: clamp(28px, 5vw, 42px); font-weight: 800; line-height: 1.05; letter-spacing: -.05em; margin: 0; }
+#plansDialog .availability-note { font-weight: 700; }
+#plansDialog .pricing-base { margin-bottom: 22px; background: var(--paper); }
+#plansDialog .pricing-base p { margin-top: 8px; }
+#plansDialog .pricing-safeguard { font-size: 11px; margin: 22px 0 0; }
+#plansDialog .regional-pricing { line-height: 1.5; }
+#plansDialog .region-panel { border: 2px solid var(--ink); border-radius: 13px; background: var(--paper); padding: 16px 18px; margin-bottom: 22px; box-shadow: 4px 4px 0 var(--ink); }
+#plansDialog .region-top { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 9px; }
+#plansDialog .region-top label { font-size: 13px; font-weight: 800; margin: 0; }
+#plansDialog .currency-chip { font-size: 11px; font-weight: 800; border: 2px solid var(--ink); border-radius: 6px; background: #e6deff; padding: 3px 8px; white-space: nowrap; }
+#plansDialog #region { display: block; width: 100%; font-size: 14px; font-weight: 600; background: white; border: 2px solid var(--ink); border-radius: 8px; padding: 11px; cursor: pointer; }
+#plansDialog p.region-help, #plansDialog p.regional-rules, #plansDialog p.rate-note { font-size: 11px; color: #4c4944; margin: 9px 0 0; }
+#plansDialog p.regional-rules, #plansDialog p.rate-note { font-size: 10px; }
+#plansDialog p.rate-note { padding-top: 12px; margin-top: 14px; border-top: 1px solid #d6d1c9; }
+#plansDialog .region-summary { font-weight: 700; }
+#plansDialog .premium { background: var(--paper); border: var(--line); border-radius: 20px; overflow: hidden; box-shadow: 6px 7px 0 var(--ink); }
+#plansDialog .choose { padding: 25px 30px 21px; }
+#plansDialog .offer-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; }
+#plansDialog .offer-head h2 { font-size: 32px; font-weight: 800; letter-spacing: -1.3px; line-height: 1.2; margin: 0; }
+#plansDialog .offer-head p { color: #615b55; margin: 5px 0 0; font-size: 14px; }
+#plansDialog .premium-mark { border: var(--line); box-shadow: 3px 3px 0 var(--ink); border-radius: 12px; width: 45px; height: 45px; display: grid; place-items: center; background: var(--pink); font-size: 30px; font-weight: 800; flex-shrink: 0; }
+#plansDialog fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+#plansDialog legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+#plansDialog .options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+#plansDialog label.option { position: relative; display: flex; flex-direction: column; margin: 0; padding: 17px 17px 18px; border: var(--line); border-radius: 13px; cursor: pointer; min-width: 0; background: white; transition: background .15s, box-shadow .15s; }
+#plansDialog .option:has(input:checked) { background: #e6deff; box-shadow: 4px 4px 0 var(--ink); }
+#plansDialog .option:has(input:focus-visible) { outline: 3px solid var(--purple); outline-offset: 5px; }
+#plansDialog .option-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 26px; margin-bottom: 15px; }
+#plansDialog .option input { appearance: none; margin: 0; padding: 0; width: 21px; height: 21px; border: 2px solid var(--ink); border-radius: 50%; flex-shrink: 0; background: white; cursor: pointer; }
+#plansDialog .option input:checked { border: 6px solid var(--ink); background: var(--purple); }
+#plansDialog .save { background: var(--pink); color: var(--ink); border: 2px solid var(--ink); font-size: 10px; font-weight: 800; padding: 3px 6px; border-radius: 6px; white-space: nowrap; }
+#plansDialog .period { font-size: 13px; font-weight: 800; margin-bottom: 5px; }
+#plansDialog .price { font-size: 31px; letter-spacing: -1.5px; line-height: 1.2; font-weight: 800; white-space: nowrap; }
+#plansDialog .currency { font-size: 12px; letter-spacing: 0; font-weight: 700; }
+#plansDialog .billing { color: #615b55; font-size: 12px; margin-top: 8px; }
+#plansDialog p.saving-line { font-size: 11px; color: #4c4944; margin: 15px 0 16px; text-align: center; }
+#plansDialog .cta { border: var(--line); border-radius: 12px; padding: 13px 18px; width: 100%; background: var(--yellow); color: var(--ink); font-size: 15px; font-weight: 800; line-height: 1.3; box-shadow: 3px 4px 0 var(--ink); opacity: 1; cursor: not-allowed; }
+#plansDialog .cta .annual-label { display: none; }
+#plansDialog .premium:has(#annual:checked) .cta .annual-label { display: inline; }
+#plansDialog .premium:has(#annual:checked) .cta .monthly-label { display: none; }
+#plansDialog p.purchase-note { text-align: center; color: #55514b; font-size: 11px; margin: 13px 0 0; }
+#plansDialog .features { padding: 22px 30px 24px; border-top: var(--line); background: white; }
+#plansDialog .features h3 { font-size: 13px; font-weight: 800; margin: 0 0 14px; }
+#plansDialog .features ul { padding: 0; margin: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 13px 20px; }
+#plansDialog .features li { position: relative; padding-left: 28px; font-size: 13px; color: #302d2a; line-height: 1.4; }
+#plansDialog .features li:before { content: '✓'; position: absolute; left: 0; top: 0; color: var(--ink); font-size: 12px; font-weight: 800; border: 1.5px solid var(--ink); border-radius: 5px; width: 18px; height: 18px; display: grid; place-items: center; background: var(--yellow); }
+#plansDialog .features .plus li:before { background: #e6deff; }
+#plansDialog .features strong { font-weight: 800; color: var(--ink); }
+#plansDialog .features h3.extra { margin-top: 22px; }
+#plansDialog .feature-detail { display: block; color: #615b55; font-size: 11px; margin-top: 3px; }
+#plansDialog p.limits { font-size: 10px; color: #615b55; margin: 19px 0 0; padding-top: 13px; border-top: 1px solid #d6d1c9; }
+@media (max-width: 520px) {
+  #plansDialog { padding: 20px 16px; }
+  #plansDialog .region-panel { padding: 14px; }
+  #plansDialog .region-top label { font-size: 12px; }
+  #plansDialog .premium { border-radius: 18px; box-shadow: 4px 5px 0 var(--ink); }
+  #plansDialog .choose { padding: 22px 14px 20px; }
+  #plansDialog .offer-head h2 { font-size: 29px; }
+  #plansDialog .offer-head p { font-size: 11px; max-width: 220px; }
+  #plansDialog .premium-mark { width: 38px; height: 38px; font-size: 25px; border-radius: 10px; }
+  #plansDialog .options { gap: 10px; }
+  #plansDialog label.option { padding: 12px 9px 16px; border-radius: 12px; border-width: 2px; }
+  #plansDialog .option-top { margin-bottom: 17px; gap: 3px; flex-wrap: wrap; }
+  #plansDialog .option input { width: 18px; height: 18px; }
+  #plansDialog .option input:checked { border-width: 5px; }
+  #plansDialog .save { font-size: 8px; padding: 3px 4px; border-width: 1.5px; }
+  #plansDialog .price { font-size: clamp(23px, 6vw, 28px); letter-spacing: -1.3px; }
+  #plansDialog .currency { display: block; font-size: 11px; margin-top: 5px; }
+  #plansDialog .period { font-size: 12px; }
+  #plansDialog .billing { font-size: 10px; margin-top: 10px; }
+  #plansDialog .cta { font-size: 13px; padding: 13px 8px; }
+  #plansDialog .features { padding: 22px 18px; }
+  #plansDialog .features ul { grid-template-columns: 1fr; gap: 13px; }
+  #plansDialog .features li, #plansDialog .features h3 { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #plansDialog .option { transition: none; }
+}

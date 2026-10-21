@@ -10,6 +10,7 @@
     />
     <title>PromptLab — Save, create, find.</title>
     <link rel="stylesheet" href="./styles.css?v=20261021-4" />
+    <link rel="stylesheet" href="./regional-pricing.css?v=20261021-5" />
   </head>
   <body>
     <div class="backdrop-shape shape-pink"></div>
@@ -54,7 +55,7 @@
           Crée de meilleurs prompts. Garde tes idées. Retrouve tes liens.
         </p>
         <button id="plansBtn" class="outline-btn plans-trigger" type="button">
-          Gratuit &amp; Premium · en préparation
+          Gratuit &amp; Premium · voir les offres
         </button>
       </section>
 
@@ -227,23 +228,47 @@
       <form method="dialog">
         <button class="dialog-close" aria-label="Fermer">×</button>
       </form>
-      <p class="eyebrow">LE FUTUR DE PROMPTLAB</p>
+      <p class="eyebrow">LES OFFRES PROMPTLAB</p>
       <h2 id="plansTitle">Gratuit &amp; Premium</h2>
-      <p>Le nouveau modèle est en préparation. Aucune offre Premium n’est encore en vente.</p>
-      <div class="plan-options">
-        <section class="plan-option" aria-labelledby="freePlanTitle">
-          <h3 id="freePlanTitle">Gratuit avec publicités</h3>
-          <p>Création et optimisation de prompts, avec les quotas IA actuels conservés.</p>
-          <p class="offer-note">Publicités non activées pour le moment.</p>
-        </section>
-        <section class="plan-option plan-premium" aria-labelledby="premiumPlanTitle">
-          <h3 id="premiumPlanTitle">Premium</h3>
-          <p>Les favoris et les collections seront réservés au Premium.</p>
-          <p class="offer-note">Disponibilité et modalités à venir.</p>
-        </section>
+      <div class="pricing-intro">
+        <p class="pricing-headline">Faites place à vos meilleures idées.</p>
+        <p>Un seul Premium. Deux rythmes. Comparez les tarifs par pays.</p>
+        <p class="availability-note">Bientôt disponible. Aucune offre Premium n’est encore en vente.</p>
       </div>
-      <p>Pour le moment, les accès restent inchangés. Tes favoris, liens et collections
-        existants ne sont ni modifiés ni supprimés par cette annonce.</p>
+      <section class="plan-option pricing-base" aria-labelledby="freePlanTitle">
+        <h3 id="freePlanTitle">L’offre de base · Gratuit</h3>
+        <p>Création et optimisation de prompts, liens simples et quotas IA actuels conservés.</p>
+        <p class="offer-note">Modèle gratuit avec publicités prévu ; aucune publicité n’est activée pour le moment.</p>
+      </section>
+      <div class="regional-pricing">
+<section class="region-panel" aria-labelledby="region-label">
+<div class="region-top"><label id="region-label" for="region">Aperçu des prix par pays / région</label><span class="currency-chip" id="currency-chip">XOF · F CFA</span></div>
+<select id="region" aria-describedby="region-help regional-rules"><option value="SN" selected>Sénégal</option></select>
+<p class="region-help" id="region-help">Sélection manuelle uniquement : cet aperçu ne vous géolocalise pas et ne détecte pas votre pays.</p>
+<p class="regional-rules" id="regional-rules">BCEAO : XOF · CEMAC : XAF · États-Unis : USD · Europe et tous les autres pays : EUR.</p>
+<p class="region-help region-summary" id="region-summary" aria-live="polite" aria-atomic="true">Sénégal — prix affichés en XOF.</p>
+<noscript><p class="region-help">Activez JavaScript pour changer de pays. Sans JavaScript, cet aperçu affiche le Sénégal (XOF).</p></noscript>
+</section>
+<section class="premium" aria-labelledby="premium-title">
+<div class="choose"><div class="offer-head"><div><h2 id="premium-title">Premium</h2><p>Vos prompts organisés, partout avec vous.</p></div><span class="premium-mark" aria-hidden="true">✧</span></div>
+<fieldset><legend>Comparer les formules Premium, sans abonnement</legend><div class="options">
+<label class="option" for="monthly"><span class="option-top"><input type="radio" name="plan" id="monthly" value="monthly" checked><span></span></span><span class="period">Mensuel</span><span class="price"><span id="monthly-amount">1 500</span> <span class="currency"><span class="currency-code">XOF</span> / mois</span></span><span class="billing">Facturation mensuelle</span></label>
+<label class="option" for="annual"><span class="option-top"><input type="radio" name="plan" id="annual" value="annual"><span class="save">Économisez ≈ 17 %</span></span><span class="period">Annuel</span><span class="price"><span id="annual-amount">15 000</span> <span class="currency"><span class="currency-code">XOF</span> / an</span></span><span class="billing">Facturation annuelle</span></label>
+</div></fieldset>
+<p class="saving-line">Économisez environ 17 % avec la formule annuelle.<br><span style="font-size:10px">Calcul sur les tarifs de base CFA : 15 000 par an au lieu de 18 000 (12 × 1 500).</span></p>
+<button class="cta" type="button" disabled><span class="monthly-label">Premium mensuel · bientôt disponible</span><span class="annual-label">Premium annuel · bientôt disponible</span></button>
+<p class="purchase-note">Bientôt disponible · Achat et paiement désactivés</p>
+<p class="rate-note">Tarifs EUR et USD fixes, avec une terminaison en ,99 : il ne s’agit pas d’une conversion automatique. Tarifs CFA inchangés : 1 500 XOF/XAF par mois ou 15 000 XOF/XAF par an. Les économies annuelles sont calculées par devise par rapport à 12 mensualités, puis arrondies au pourcentage le plus proche.</p>
+</div>
+<div class="features"><h3>Toute l’offre de base est incluse :</h3><ul class="base"><li>Création de prompts</li><li>Optimisation de prompts</li><li>Quotas IA actuels conservés</li><li>Liens simples</li></ul>
+<h3 class="extra">Et tous les avantages Premium :</h3><ul class="plus"><li><strong>Favoris de prompts</strong><span class="feature-detail">Retrouvez vos prompts préférés.</span></li><li><strong>Collections</strong><span class="feature-detail">Organisez votre bibliothèque.</span></li><li><strong>Synchronisation entre appareils</strong><span class="feature-detail">Votre bibliothèque via votre compte.</span></li><li><strong>Aucune publicité</strong><span class="feature-detail">Un espace sans distraction publicitaire.</span></li></ul>
+<p class="limits">Les mêmes fonctionnalités dans les deux formules. Les quotas IA actuels restent applicables : aucun accès illimité n’est proposé.</p></div>
+</section>
+      </div>
+      <p class="pricing-safeguard">Présentation uniquement : les favoris et les collections seront réservés au Premium,
+        avec synchronisation via compte et sans publicité. Pour le moment, les accès restent inchangés.
+        Tes favoris, liens et collections existants ne sont ni modifiés ni supprimés.
+        Aucun paiement, publicité ou suivi publicitaire n’est activé.</p>
     </dialog>
 
     <dialog id="settingsDialog" class="settings-dialog">
@@ -389,5 +414,6 @@
       <div id="searchResults" class="saved-list"></div>
     </dialog>
     <script src="./app.js?v=20261021-4"></script>
+    <script src="./regional-pricing.js?v=20261021-5"></script>
   </body>
 </html>
