@@ -1,5 +1,11 @@
 name = "promptlab-ai"
 main = "worker.js"
 compatibility_date = "2026-10-21"
+
 [ai]
 binding = "AI"
+
+[[d1_databases]]
+binding = "QUOTAS"
+database_name = "promptlab-free-quotas"
+database_id = "a453dd3a-a925-46fb-bb7f-4600ca94efca"

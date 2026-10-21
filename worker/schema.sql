@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS free_usage (day TEXT NOT NULL, client TEXT NOT NULL, generations INTEGER NOT NULL DEFAULT 0, optimizations INTEGER NOT NULL DEFAULT 0, window_start INTEGER NOT NULL, minute_used INTEGER NOT NULL, PRIMARY KEY(day, client));
