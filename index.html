@@ -302,6 +302,8 @@
         pendant la préparation de l’offre Premium pour les favoris et collections.
         La connexion par e-mail fonctionne sans e-mail de validation. Conserve
         ton code de récupération.
+        La session est limitée à cet onglet : après sa fermeture, une nouvelle
+        connexion peut être nécessaire. Les bibliothèques locales restent conservées.
       </p>
       <div id="accountLoggedOut">
         <div class="account-tabs">
@@ -357,12 +359,20 @@
           <p class="notice">
             Saisis l’email, ton code de récupération et un nouveau mot de passe.
             Le code n’est pas envoyé par email.
+            Chaque récupération invalide l’ancien code et toutes les sessions du compte.
+            Un nouveau code sera affiché une seule fois : conserve-le avant de te connecter.
+            Si la réponse est interrompue, essaie d’abord de te connecter avec le
+            nouveau mot de passe, sans relancer automatiquement la récupération.
           </p>
           <form id="recoveryForm" class="account-form">
             <input
               id="recoveryCode"
               inputmode="text"
-              pattern="[0-9a-fA-F]{16,}"
+              pattern="[0-9a-f]{64}"
+              minlength="64"
+              maxlength="64"
+              autocomplete="off"
+              spellcheck="false"
               placeholder="Code de récupération hexadécimal"
               required
             /><input
@@ -370,6 +380,7 @@
               type="password"
               minlength="12"
               maxlength="128"
+              autocomplete="new-password"
               placeholder="Nouveau mot de passe"
               required
             /><button class="primary-btn">Réinitialiser le mot de passe</button>
@@ -413,7 +424,7 @@
       <input id="searchInput" type="search" placeholder="Rechercher…" />
       <div id="searchResults" class="saved-list"></div>
     </dialog>
-    <script src="./app.js?v=20261021-4"></script>
+    <script src="./app.js?v=20261023-1"></script>
     <script src="./regional-pricing.js?v=20261021-5"></script>
   </body>
 </html>

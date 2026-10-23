@@ -3,6 +3,7 @@ const API_BASE = "https://promptlab-ai.ndiayeelage0508.workers.dev";
 const ANON_KEY = "promptlab-combined-v1",
   TOKEN_KEY = "promptlab-auth-token",
   USER_KEY = "promptlab-auth-user",
+  SESSION_KEY = "promptlab-session-v1",
   CACHE_PREFIX = "promptlab-library-",
   BASE_PREFIX = "promptlab-base-";
 const MAX_ITEMS = 1000,
@@ -28,6 +29,8 @@ const state = {
   syncBusy: false,
   queued: false,
   accountMode: "login",
+  authAttempt: 0,
+  recoveryBusy: false,
   googleNonce: null,
   aiController: null,
   deleting: false,
@@ -418,6 +421,13 @@ function searchAll(q) {
         .join("")
     : '<p class="empty-state">Aucun résultat.</p>';
 }
+function setSavedFilter(filter) {
+  state.filter = filter;
+  $("collectionFilters")
+    .querySelectorAll(".filter-chip")
+    .forEach((chip) => chip.classList.toggle("active", chip.dataset.filter === filter));
+  renderSaved();
+}
 async function authFetch(path, opts = {}, captured = state.token) {
   const h = new Headers(opts.headers || {});
   if (captured) h.set("Authorization", "Bearer " + captured);
@@ -430,35 +440,55 @@ async function authFetch(path, opts = {}, captured = state.token) {
   }
   return r;
 }
+function clearLegacySession() {
+  // Do not touch account libraries or anonymous data. Try each key even if
+  // another removal fails (for example when browser storage is restricted).
+  for (const key of [SESSION_KEY, TOKEN_KEY, USER_KEY]) {
+    try { localStorage.removeItem(key); } catch {}
+  }
+}
 function setToken(t, u) {
   state.token = t;
   state.user = u;
+  $("accountPassword").value = "";
+  clearLegacySession();
   try {
-    localStorage.setItem(
-      "promptlab-session-v1",
-      JSON.stringify({ token: t, user: u }),
-    );
-    localStorage.setItem(TOKEN_KEY, t);
-    localStorage.setItem(USER_KEY, JSON.stringify(u));
-  } catch {}
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ token: t, user: u }));
+  } catch {
+    // Continue in memory, never fall back to persistent token storage.
+    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  }
 }
 function clearRecovery() {
   $("recoveryOnce").hidden = true;
   $("recoveryCodeLabel").textContent = "";
 }
 async function loadAccount() {
-  let token = null;
-  try {
-    token = localStorage.getItem(TOKEN_KEY);
-  } catch {}
-  let user = readJSON(USER_KEY, null);
-  const savedSession = readJSON("promptlab-session-v1", null);
-  if (savedSession?.token && savedSession?.user) {
-    token = savedSession.token;
-    user = savedSession.user;
+  const validSession = (s) => s && typeof s.token === "string" &&
+    /^[a-f0-9]{64}$/.test(s.token) && s.user &&
+    typeof s.user.id === "string" && s.user.id.length > 0 &&
+    typeof s.user.email === "string" &&
+    ["password", "google"].includes(s.user.provider);
+  let savedSession = null;
+  try { savedSession = JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch {}
+  if (!validSession(savedSession)) {
+    // One-time migration of either historical format, into this tab only.
+    savedSession = readJSON(SESSION_KEY, null);
+    if (!validSession(savedSession)) {
+      let token = null;
+      try { token = localStorage.getItem(TOKEN_KEY); } catch {}
+      savedSession = { token, user: readJSON(USER_KEY, null) };
+    }
   }
-  state.token = token;
-  state.user = user;
+  clearLegacySession();
+  const token = validSession(savedSession) ? savedSession.token : null,
+    user = token ? savedSession.user : null;
+  if (token) setToken(token, user);
+  else {
+    state.token = null;
+    state.user = null;
+    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  }
   if (!token || !user) {
     state.token = null;
     state.user = null;
@@ -652,6 +682,8 @@ async function deleteAccount() {
     $("deleteConfirmation").focus();
     return;
   }
+  // Account deletion supersedes any login callback still in flight.
+  state.authAttempt++;
   state.deleting = true;
   clearTimeout(state.syncTimer);
   state.queued = false;
@@ -687,12 +719,10 @@ function resetDeleteConfirmation() {
 }
 async function endSession(callServer = true, captured = state.token) {
   const oldToken = captured;
-  if (callServer && oldToken) {
-    try {
-      await authFetch("/api/auth/logout", { method: "POST" }, oldToken);
-    } catch {}
-  }
   if (state.token !== oldToken) return;
+  // Clear the local session before any network wait. A stalled logout must not
+  // leave the token usable by focus handlers, sync, or a page reload.
+  const sessionAttempt = ++state.authAttempt;
   state.token = null;
   state.user = null;
   state.baseRemote = null;
@@ -704,16 +734,31 @@ async function endSession(callServer = true, captured = state.token) {
   $("accountPassword").value = "";
   $("recoveryCode").value = "";
   $("recoveryPassword").value = "";
-  try {
-    localStorage.removeItem("promptlab-session-v1");
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-  } catch {}
+  clearLegacySession();
+  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
   state.data = loadCache(ANON_KEY);
   persist();
   renderSaved();
   updateAccountUI();
   syncStatus("hors connexion", false);
+  if (callServer && oldToken) {
+    let confirmed = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await authFetch("/api/auth/logout", {
+        method: "POST", signal: controller.signal,
+      }, oldToken);
+      confirmed = response.ok || response.status === 401;
+    } catch {} finally {
+      clearTimeout(timeout);
+    }
+    // An old logout response must not overwrite a newer login/recovery message.
+    if (state.authAttempt !== sessionAttempt || state.token !== null) return;
+    accountMsg(confirmed
+      ? "Déconnecté. La session serveur est révoquée ou déjà expirée."
+      : "Déconnecté sur cet onglet. La révocation serveur n’a pas été confirmée ; une copie du jeton peut rester valable jusqu’à son expiration.", !confirmed);
+  }
 }
 function accountMsg(m, e = false) {
   $("accountStatus").textContent = m;
@@ -731,6 +776,7 @@ function updateAccountUI() {
 }
 async function submitAccount(e) {
   e.preventDefault();
+  if (state.recoveryBusy) return accountMsg("Récupération en cours. Attends la réponse avant de te connecter.", true);
   const email = $("accountEmail").value.trim(),
     password = $("accountPassword").value;
   if ([...password].length < 12 || password.length > 128)
@@ -739,7 +785,8 @@ async function submitAccount(e) {
       true,
     );
   const mode = state.accountMode,
-    p = mode === "register" ? "/api/auth/register" : "/api/auth/login";
+    p = mode === "register" ? "/api/auth/register" : "/api/auth/login",
+    attempt = ++state.authAttempt;
   try {
     const r = await fetch(apiPath(p), {
         method: "POST",
@@ -748,6 +795,7 @@ async function submitAccount(e) {
       }),
       d = await r.json().catch(() => ({}));
     if (!r.ok) throw Error(d.error || "Authentification impossible");
+    if (attempt !== state.authAttempt) return;
     clearRecovery();
     resetDeleteConfirmation();
     setToken(d.token, d.user);
@@ -761,41 +809,79 @@ async function submitAccount(e) {
     renderSaved();
     accountMsg("Compte connecté. Les données anonymes restent séparées.");
     try {
-      await pullLibrary(state.token, state.user.id);
+      await pullLibrary(d.token, d.user.id);
+      if (attempt !== state.authAttempt) return;
     } catch {
+      if (attempt !== state.authAttempt) return;
       syncStatus("synchronisation hors connexion", true);
     }
   } catch (x) {
+    if (attempt !== state.authAttempt) return;
     accountMsg(x.message, true);
   }
 }
 async function recover(e) {
   e.preventDefault();
+  if (state.recoveryBusy) return;
   const password = $("recoveryPassword").value;
   if ([...password].length < 12 || password.length > 128)
     return accountMsg(
       "Le mot de passe doit contenir entre 12 et 128 caractères.",
       true,
     );
+  const email = $("accountEmail").value.trim(),
+    attempt = ++state.authAttempt,
+    button = $("recoveryForm").querySelector("button");
+  state.recoveryBusy = true;
+  button.disabled = true;
+  clearRecovery();
+  let uncertain = true;
   try {
     const r = await fetch(apiPath("/api/auth/recover"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: $("accountEmail").value.trim(),
+          email,
           recoveryCode: $("recoveryCode").value.trim(),
           password,
+          recoveryProtocol: 2,
         }),
-      }),
-      d = await r.json().catch(() => ({}));
+      });
+    // A network error or 5xx can occur after the server committed the change.
+    // Only an explicit client-error response is a known refusal here.
+    uncertain = !(r.status >= 400 && r.status < 500);
+    const payload = await r.json().catch(() => null);
+    const d = payload && typeof payload === "object" && !Array.isArray(payload) ? payload : {};
     if (!r.ok) throw Error(d.error || "Code invalide");
+    if (attempt !== state.authAttempt) return;
+    // Recovery revokes sessions for this password account on the server.
+    if (state.user?.provider === "password" &&
+        state.user.email.toLowerCase() === email.toLowerCase()) {
+      await endSession(false);
+    }
+    $("recoveryCode").value = "";
+    $("recoveryPassword").value = "";
+    $("accountPassword").value = "";
     $("recoveryBox").hidden = true;
-    accountMsg("Mot de passe réinitialisé. Tu peux te connecter.");
+    if (typeof d.recoveryCode !== "string" || !/^[a-f0-9]{64}$/.test(d.recoveryCode)) {
+      accountMsg("Le nouveau code n’a pas été reçu. La réponse est incomplète : essaie de te connecter avec ton nouveau mot de passe pour vérifier le changement. Ne relance pas automatiquement la récupération : l’ancien code peut déjà être invalidé.", true);
+      return;
+    }
+    $("recoveryCodeLabel").textContent = d.recoveryCode;
+    $("recoveryOnce").hidden = false;
+    accountMsg("Mot de passe réinitialisé et sessions révoquées. Conserve le nouveau code : l’ancien ne fonctionne plus. Tu peux te connecter.");
   } catch (x) {
-    accountMsg(x.message, true);
+    if (attempt !== state.authAttempt) return;
+    accountMsg(uncertain
+      ? "Résultat de récupération non confirmé. Le changement peut déjà être effectué : essaie de te connecter avec ton nouveau mot de passe. Ne relance pas automatiquement la récupération : l’ancien code peut déjà être invalidé."
+      : x.message, true);
+  } finally {
+    state.recoveryBusy = false;
+    button.disabled = false;
   }
 }
 function googleLogin() {
+  if (state.recoveryBusy) return accountMsg("Récupération en cours. Attends la réponse avant de te connecter.", true);
   if (window.google?.accounts?.id) google.accounts.id.prompt();
 }
 async function setupGoogle() {
@@ -814,17 +900,21 @@ async function setupGoogle() {
         client_id: d.googleClientId,
         nonce: state.googleNonce,
         callback: async (res) => {
+          if (state.recoveryBusy) return;
+          const attempt = ++state.authAttempt;
+          const nonce = state.googleNonce;
           try {
             const r = await fetch(apiPath("/api/auth/google"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   credential: res.credential,
-                  nonce: state.googleNonce,
+                  nonce,
                 }),
               }),
               x = await r.json();
             if (!r.ok) throw Error(x.error || "Connexion Google impossible");
+            if (attempt !== state.authAttempt) return;
             clearRecovery();
             resetDeleteConfirmation();
             setToken(x.token, x.user);
@@ -833,12 +923,16 @@ async function setupGoogle() {
             updateAccountUI();
             renderSaved();
             try {
-              await pullLibrary(state.token, state.user.id);
+              await pullLibrary(x.token, x.user.id);
+              if (attempt !== state.authAttempt) return;
             } catch {
+              if (attempt !== state.authAttempt) return;
               syncStatus("synchronisation hors connexion", true);
             }
+            if (attempt !== state.authAttempt) return;
             accountMsg("Compte Google connecté.");
           } catch (e) {
+            if (attempt !== state.authAttempt) return;
             accountMsg(e.message, true);
           }
         },
@@ -883,8 +977,7 @@ document.querySelectorAll(".collection-card").forEach((b) =>
       setMode(b.dataset.view);
       $("toolPanel").scrollIntoView({ behavior: "smooth" });
     } else {
-      state.filter = b.dataset.view === "favorites" ? "favorites" : "all";
-      renderSaved();
+      setSavedFilter(b.dataset.view === "favorites" ? "favorites" : "all");
       $("linksPanel").scrollIntoView({ behavior: "smooth" });
     }
   }),
@@ -926,13 +1019,7 @@ $("linkForm").addEventListener("submit", (e) => {
 });
 $("collectionFilters").addEventListener("click", (e) => {
   const b = e.target.closest("[data-filter]");
-  if (b) {
-    state.filter = b.dataset.filter;
-    document
-      .querySelectorAll(".filter-chip")
-      .forEach((x) => x.classList.toggle("active", x === b));
-    renderSaved();
-  }
+  if (b) setSavedFilter(b.dataset.filter);
 });
 $("savedList").addEventListener("click", async (e) => {
   const b = e.target.closest("[data-action]");
