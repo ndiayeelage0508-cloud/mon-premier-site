@@ -125,7 +125,8 @@ function validPassword(value) { return typeof value === 'string' && [...value].l
 function publicUser(row) { return { id: row.id, email: row.email, provider: row.provider }; }
 function authError(status, message) { throw { status, message }; }
 async function authBody(request, max = 16384) {
-  if (!(request.headers.get('Content-Type') || '').toLowerCase().startsWith('application/json')) authError(415, 'Content-Type application/json requis.');
+  // Match a media type, not a prefix such as application/jsonp.
+  if ((request.headers.get('Content-Type') || '').split(';')[0].trim().toLowerCase() !== 'application/json') authError(415, 'Content-Type application/json requis.');
   if (+request.headers.get('Content-Length') > max) authError(413, 'Données trop volumineuses.');
   if (!request.body) authError(400, 'Corps JSON requis.');
   const reader = request.body.getReader(); let size = 0; const parts = [];
@@ -146,7 +147,7 @@ async function throttle(db, key, limit, windowMs, userId = null) {
   const row = userId
     ? await db.prepare(statement).bind(key, bucket, (bucket + 1) * windowMs, userId, limit).first()
     : await db.prepare(statement).bind(key, bucket, (bucket + 1) * windowMs, limit).first();
-  if (!row) authError(429, 'Trop de tentatives. Réessaie plus tard.');
+  if (!row) throw { status: 429, message: 'Trop de tentatives. Réessaie plus tard.', retryAfter: Math.max(1, Math.ceil(((bucket + 1) * windowMs - now) / 1000)) };
 }
 async function deleteAccount(db, user) {
   const emailHash = await digest(user.email.trim().toLowerCase());
@@ -160,12 +161,26 @@ async function deleteAccount(db, user) {
     db.prepare("DELETE FROM auth_limits WHERE key=? AND NOT EXISTS (SELECT 1 FROM account_users WHERE lower(email)=? AND id<>?)").bind('email:' + emailHash, user.email.trim().toLowerCase(), user.id)
   ]);
 }
-async function issueSession(db, user) {
-  const token = randomSecret(); const now = Date.now();
-  await db.batch([
-    db.prepare('INSERT INTO account_sessions (token_hash,user_id,expires_at) VALUES (?,?,?)').bind(await digest(token), user.id, now + SESSION_MS),
-    db.prepare('DELETE FROM account_sessions WHERE token_hash IN (SELECT token_hash FROM account_sessions WHERE user_id = ? ORDER BY expires_at DESC LIMIT -1 OFFSET 10)').bind(user.id)
+async function issueSession(db, user, passwordSnapshot = null) {
+  const token = randomSecret(); const tokenHash = await digest(token); const now = Date.now();
+  const password = user?.provider === 'password';
+  const insert = password
+    ? db.prepare(`INSERT INTO account_sessions (token_hash,user_id,expires_at)
+        SELECT ?,id,? FROM account_users
+        WHERE id=? AND provider='password' AND password_hash=? AND password_salt=?`)
+      .bind(tokenHash, now + SESSION_MS, user?.id, passwordSnapshot?.hash, passwordSnapshot?.salt)
+    : db.prepare(`INSERT INTO account_sessions (token_hash,user_id,expires_at)
+        SELECT ?,id,? FROM account_users WHERE id=? AND provider='google'`)
+      .bind(tokenHash, now + SESSION_MS, user?.id);
+  const results = await db.batch([
+    insert,
+    // The token guard makes this a no-op when the conditional insert lost its
+    // race, so an unsuccessful issuance cannot evict any existing sessions.
+    db.prepare(`DELETE FROM account_sessions
+      WHERE token_hash IN (SELECT token_hash FROM account_sessions WHERE user_id = ? ORDER BY expires_at DESC LIMIT -1 OFFSET 10)
+      AND EXISTS (SELECT 1 FROM account_sessions WHERE token_hash=? AND user_id=?)`).bind(user?.id, tokenHash, user?.id)
   ]);
+  if (!results?.[0]?.meta?.changes) authError(401, 'Session invalide. Reconnecte-toi.');
   return { token, user: publicUser(user) };
 }
 async function sessionUser(request, db) {
@@ -256,6 +271,10 @@ async function accountsRoute(request, env, ctx, url, origin) {
     const ipKey = await digest('auth:' + ip);
     await throttle(db, 'auth:' + ipKey, 10, 60000);
     const body = await authBody(request);
+    // Recovery rotates the one-time code. Older clients cannot display the
+    // replacement, so refuse them before reading or changing account state.
+    if (path === '/api/auth/recover' && body.recoveryProtocol !== 2)
+      authError(426, 'Cette version du site est ancienne. Recharge la page puis réessaie la récupération.');
     if (path === '/api/auth/google') {
       if (!env.GOOGLE_CLIENT_ID) authError(503, 'Connexion Google en attente de configuration. La connexion e-mail est disponible.');
       const identity = await verifyGoogle(body.credential, body.nonce, env.GOOGLE_CLIENT_ID);
@@ -278,32 +297,34 @@ async function accountsRoute(request, env, ctx, url, origin) {
       const hash = await passwordHash(body.password, salt);
       const result = await db.prepare("INSERT OR IGNORE INTO account_users (id,provider,subject,email,password_hash,password_salt,recovery_hash,created_at) VALUES (?,'password',?,?,?,?,?,?)").bind(id,email,email,hash,salt,await digest(recoveryCode),Date.now()).run();
       if (!result.meta.changes) authError(409, 'Inscription indisponible pour cette adresse. Essaie la connexion ou la récupération.');
-      return json({ ...await issueSession(db, { id, email, provider:'password' }), recoveryCode }, 201, origin);
+      return json({ ...await issueSession(db, { id, email, provider:'password' }, { hash, salt }), recoveryCode }, 201, origin);
     }
     const user = await db.prepare("SELECT * FROM account_users WHERE provider='password' AND subject=?").bind(email).first();
     if (path === '/api/auth/login') {
       if (!validPassword(body.password)) authError(401, 'Adresse ou mot de passe incorrect.');
       const calculated = await passwordHash(body.password, user?.password_salt || '00000000000000000000000000000000');
       if (!user || !equalHash(calculated, user.password_hash)) authError(401, 'Adresse ou mot de passe incorrect.');
-      return json(await issueSession(db, user), 200, origin);
+      return json(await issueSession(db, user, { hash: user.password_hash, salt: user.password_salt }), 200, origin);
     }
     if (path === '/api/auth/recover') {
       if (!validPassword(body.password)) authError(400, 'Choisis un mot de passe de 12 à 128 caractères.');
       if (typeof body.recoveryCode !== 'string' || !/^[a-f0-9]{64}$/.test(body.recoveryCode)) authError(401, 'Adresse ou code de récupération incorrect.');
       const recoveryHash = await digest(body.recoveryCode);
       if (!user || !equalHash(recoveryHash, user.recovery_hash || '')) authError(401, 'Adresse ou code de récupération incorrect.');
-      const salt = randomSecret(); const hash = await passwordHash(body.password, salt);
+      const salt = randomSecret(); const hash = await passwordHash(body.password, salt); const recoveryCode = randomSecret(); const nextRecoveryHash = await digest(recoveryCode);
       const results = await db.batch([
-        db.prepare('UPDATE account_users SET password_hash=?,password_salt=? WHERE id=? AND recovery_hash=?').bind(hash,salt,user.id,recoveryHash),
-        db.prepare('DELETE FROM account_sessions WHERE user_id=?').bind(user.id)
+        db.prepare('UPDATE account_users SET password_hash=?,password_salt=?,recovery_hash=? WHERE id=? AND recovery_hash=?').bind(hash,salt,nextRecoveryHash,user.id,recoveryHash),
+        // The new hash is visible only if the CAS update succeeded, so a
+        // losing concurrent recovery cannot revoke sessions or mutate state.
+        db.prepare('DELETE FROM account_sessions WHERE user_id=? AND EXISTS (SELECT 1 FROM account_users WHERE id=? AND recovery_hash=?)').bind(user.id,user.id,nextRecoveryHash)
       ]);
       if (!results[0].meta.changes) authError(401, 'Code de récupération incorrect.');
-      return json({ ok: true }, 200, origin);
+      return json({ ok: true, recoveryCode }, 200, origin);
     }
     authError(404, 'Route introuvable.');
   } catch (error) {
     const status = error.status || 503;
-    return json({ error: error.status ? error.message : 'Synchronisation ou comptes temporairement indisponibles. Réessaie plus tard.' }, status, origin, status === 429 ? { 'Retry-After': '60' } : {});
+    return json({ error: error.status ? error.message : 'Synchronisation ou comptes temporairement indisponibles. Réessaie plus tard.' }, status, origin, status === 429 ? { 'Retry-After': String(error.retryAfter || 60) } : {});
   } finally {
     ctx.waitUntil(db.batch([
       db.prepare('DELETE FROM auth_limits WHERE rowid IN (SELECT rowid FROM auth_limits WHERE expires_at<? LIMIT 50)').bind(Date.now()),
