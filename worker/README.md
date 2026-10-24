@@ -12,7 +12,7 @@ Les tables additives de `accounts-schema.sql` hébergent utilisateurs, sessions,
 
 Les mots de passe sont dérivés par PBKDF2-SHA-256 (100 000 itérations, sel aléatoire par compte). Les jetons de session aléatoires de 256 bits ne sont stockés dans D1 que sous leur empreinte SHA-256 ; expiration à 30 jours, maximum 10 sessions. Déconnexion et récupération révoquent respectivement la session ou toutes les sessions du compte.
 
-L’adresse d’un compte par mot de passe n’est pas vérifiée par e-mail. Aucun service d’envoi d’e-mail n’est configuré : la récupération nécessite le code secret aléatoire affiché à l’inscription. Il faut le conserver ; aucun e-mail de réinitialisation ne sera envoyé. Le code reste utilisable pour les récupérations ultérieures. Les comptes Google sont identifiés par leur `sub`, jamais fusionnés automatiquement sur une adresse d’un compte par mot de passe. Les deux méthodes créent donc des espaces séparés, même pour une adresse identique.
+L’adresse d’un compte par mot de passe n’est pas vérifiée par e-mail. Aucun service d’envoi d’e-mail n’est configuré : la récupération nécessite le code secret aléatoire affiché à l’inscription. Il faut le conserver ; aucun e-mail de réinitialisation ne sera envoyé. Avec le protocole de récupération 2, le code est remplacé après chaque succès et le nouveau code est affiché une seule fois. Le Worker refuse une requête de récupération sans ce protocole avec HTTP 426, avant de modifier le compte, et demande de recharger la page. Les comptes Google sont identifiés par leur `sub`, jamais fusionnés automatiquement sur une adresse d’un compte par mot de passe. Les deux méthodes créent donc des espaces séparés, même pour une adresse identique.
 
 ## Activation Google
 

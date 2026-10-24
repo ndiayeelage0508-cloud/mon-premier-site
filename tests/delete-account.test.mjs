@@ -30,12 +30,13 @@ class D1 {
   async batch(statements) {
     this.db.exec('BEGIN');
     try {
+      const results = [];
       for (let i = 0; i < statements.length; i++) {
         if (this.failAfter !== null && i >= this.failAfter) throw new Error('injected batch failure');
-        await statements[i].run();
+        results.push(await statements[i].run());
       }
       this.db.exec('COMMIT');
-      return [];
+      return results;
     } catch (error) {
       this.db.exec('ROLLBACK');
       throw error;
@@ -117,7 +118,7 @@ assert.equal(rows(h, 'SELECT * FROM auth_limits WHERE key=?', emailKey).length, 
 assert.equal((await call(h, '/api/auth/me', { headers: { Authorization: `Bearer ${first.token}` } })).r.status, 401);
 assert.equal((await call(h, '/api/auth/me', { headers: { Authorization: `Bearer ${secondSession}` } })).r.status, 401);
 // A deleted password account cannot recover; its old recovery hash is gone.
-assert.equal((await call(h, '/api/auth/recover', { method: 'POST', body: { email, recoveryCode: 'a'.repeat(64), password: 'new-password-123' } })).r.status, 401);
+assert.equal((await call(h, '/api/auth/recover', { method: 'POST', body: { email, recoveryCode: 'a'.repeat(64), password: 'new-password-123', recoveryProtocol: 2 } })).r.status, 401);
 assert.equal((await call(h, '/api/auth/login', { method: 'POST', body: { email, password: '123456789012' } })).r.status, 401);
 // FK protection means stale sessions/library rows cannot recreate a deleted user.
 assert.throws(() => h.db.db.prepare('INSERT INTO account_libraries(user_id,data,revision,updated_at) VALUES (?,?,?,?)').run(firstId, JSON.stringify(empty), 0, Date.now()), /FOREIGN KEY/);

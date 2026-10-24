@@ -67,6 +67,7 @@ async function boot({ deleteStatus = 200, deleteBody = { ok: true }, deleteGate 
   assert.equal(h.window.localStorage.getItem('promptlab-library-user-a'), null);
   assert.equal(h.window.localStorage.getItem('promptlab-base-user-a'), null);
   assert.equal(h.window.localStorage.getItem('promptlab-session-v1'), null);
+  assert.equal(h.window.sessionStorage.getItem('promptlab-session-v1'), null);
   assert.deepEqual(JSON.parse(h.window.localStorage.getItem('promptlab-combined-v1')), anonData);
   assert.equal(h.window.document.querySelector('#deleteConfirmation').value, '');
   assert.equal(h.window.document.querySelector('#deleteAccountBtn').disabled, true);
@@ -80,7 +81,8 @@ async function boot({ deleteStatus = 200, deleteBody = { ok: true }, deleteGate 
   input.value = 'SUPPRIMER'; input.dispatchEvent(new h.window.Event('input', { bubbles: true }));
   h.window.document.querySelector('#deleteAccountBtn').click();
   await new Promise(resolve => setTimeout(resolve, 20));
-  assert.notEqual(h.window.localStorage.getItem('promptlab-session-v1'), null);
+  assert.equal(h.window.localStorage.getItem('promptlab-session-v1'), null);
+  assert.notEqual(h.window.sessionStorage.getItem('promptlab-session-v1'), null);
   assert.notEqual(h.window.localStorage.getItem('promptlab-library-user-a'), null);
   assert.match(h.window.document.querySelector('#accountStatus').textContent, /indisponible/);
   h.dom.window.close();

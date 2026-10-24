@@ -1,6 +1,6 @@
 name = "promptlab-ai"
 main = "worker.js"
-compatibility_date = "2026-10-21"
+compatibility_date = "2026-10-18"
 
 [vars]
 GOOGLE_CLIENT_ID = "481640280860-j3re8aa2k950dteodsac2f1to3d0naiq.apps.googleusercontent.com"
