@@ -62,7 +62,7 @@ test('ad slot is inert and boot makes no new third-party network call', () => {
   assert.equal(template.tagName, 'TEMPLATE');
   assert.equal(template.content.querySelectorAll('.ad-slot').length, 1);
   assert.equal(window.document.querySelectorAll('.ad-slot, iframe').length, 0);
-  assert.deepEqual([...window.document.scripts].map(s => s.getAttribute('src')), ['./app.js?v=20261021-4', './regional-pricing.js?v=20261021-5']);
+  assert.deepEqual([...window.document.scripts].map(s => s.getAttribute('src')), ['./app.js?v=20261023-1', './regional-pricing.js?v=20261021-5']);
   assert.equal(calls.length, 1);
   assert.equal(new URL(calls[0]).pathname, '/api/auth/config');
   dom.window.close();
