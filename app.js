@@ -1148,6 +1148,20 @@ function renderCollections() {
     button.classList.toggle("active", state.filter === collection.id);
     filters.appendChild(button);
   }
+  const validFilters = new Set([
+    "all",
+    "favorites",
+    "unsorted",
+    "learning",
+    "watch",
+    ...state.data.collections.map((collection) => collection.id),
+  ]);
+  if (!validFilters.has(state.filter)) state.filter = "all";
+  filters
+    .querySelectorAll(".filter-chip")
+    .forEach((chip) =>
+      chip.classList.toggle("active", chip.dataset.filter === state.filter),
+    );
   if ([...select.options].some((option) => option.value === selected))
     select.value = selected;
 }
