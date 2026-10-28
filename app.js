@@ -241,7 +241,11 @@ function setMode(m) {
   state.mode = m;
   document
     .querySelectorAll(".mode-btn")
-    .forEach((b) => b.classList.toggle("active", b.dataset.mode === m));
+    .forEach((b) => {
+      const active = b.dataset.mode === m;
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-pressed", String(active));
+    });
   $("toolEyebrow").textContent =
     m === "generate" ? "PROMPT STUDIO" : "OPTIMISEUR DE PROMPTS";
   $("toolTitle").textContent =
@@ -407,16 +411,19 @@ function searchAll(q) {
   const r = [
     ...state.data.links
       .filter((x) => `${x.title} ${x.url}`.toLowerCase().includes(q))
-      .map((x) => ({ t: x.title, s: "Lien" })),
+      .map((x) => ({ t: x.title, s: "Lien", kind: "link", id: x.id })),
     ...state.data.favorites
       .filter((x) => x.text.toLowerCase().includes(q))
-      .map((x) => ({ t: x.text.slice(0, 80), s: "Prompt favori" })),
+      .map((x) => ({ t: x.text.slice(0, 80), s: "Prompt favori", kind: "favorite", id: x.id })),
   ];
   $("searchResults").innerHTML = r.length
     ? r
         .map(
-          (x) =>
-            `<div class="saved-item"><div class="saved-item-main"><div class="saved-item-title">${escapeHTML(x.t)}</div><div class="saved-item-sub">${x.s}</div></div></div>`,
+          (x) => {
+            const action = x.kind === "link" ? "open" : "copy-fav";
+            const label = x.kind === "link" ? "Ouvrir ↗" : "Copier";
+            return `<div class="saved-item"><div class="saved-item-main"><div class="saved-item-title">${escapeHTML(x.t)}</div><div class="saved-item-sub">${escapeHTML(x.s)}</div></div><div class="saved-item-actions"><button data-action="${action}" data-id="${escapeHTML(x.id)}">${label}</button></div></div>`;
+          },
         )
         .join("")
     : '<p class="empty-state">Aucun résultat.</p>';
@@ -425,7 +432,11 @@ function setSavedFilter(filter) {
   state.filter = filter;
   $("collectionFilters")
     .querySelectorAll(".filter-chip")
-    .forEach((chip) => chip.classList.toggle("active", chip.dataset.filter === filter));
+    .forEach((chip) => {
+      const active = chip.dataset.filter === filter;
+      chip.classList.toggle("active", active);
+      chip.setAttribute("aria-pressed", String(active));
+    });
   renderSaved();
 }
 async function authFetch(path, opts = {}, captured = state.token) {
@@ -964,6 +975,28 @@ function importAnon() {
   )
     accountMsg("Données anonymes importées et synchronisation demandée.");
 }
+async function handleSavedAction(button) {
+  const id = button.dataset.id;
+  if (button.dataset.action === "open") {
+    const link = state.data.links.find((x) => x.id === id);
+    if (link) window.open(link.url, "_blank", "noopener,noreferrer");
+  } else if (button.dataset.action === "delete-link") {
+    prospective((d) => (d.links = d.links.filter((x) => x.id !== id)));
+  } else if (button.dataset.action === "delete-fav") {
+    prospective((d) => (d.favorites = d.favorites.filter((x) => x.id !== id)));
+  } else if (button.dataset.action === "copy-fav") {
+    const favorite = state.data.favorites.find((x) => x.id === id);
+    if (favorite) {
+      try {
+        await navigator.clipboard.writeText(favorite.text);
+        showStatus("Prompt copié.");
+      } catch {
+        showStatus("Copie indisponible.", true);
+      }
+    }
+  }
+  renderSaved();
+}
 // UI wiring
 // Informational only: no paywall until server entitlements and migration are approved.
 $("plansBtn").addEventListener("click", () => $("plansDialog").showModal());
@@ -1000,6 +1033,8 @@ $("quickAddBtn").addEventListener("click", () => {
     $("promptInput").value = v;
     setMode("generate");
     $("quickInput").value = "";
+    $("promptInput").focus();
+    showStatus("Idée placée dans Prompt Studio. Lance la génération quand tu es prêt.");
   }
 });
 $("quickInput").addEventListener("keydown", (e) => {
@@ -1024,23 +1059,12 @@ $("collectionFilters").addEventListener("click", (e) => {
 $("savedList").addEventListener("click", async (e) => {
   const b = e.target.closest("[data-action]");
   if (!b) return;
-  const id = b.dataset.id;
-  if (b.dataset.action === "open") {
-    const x = state.data.links.find((x) => x.id === id);
-    if (x) window.open(x.url, "_blank", "noopener,noreferrer");
-  } else if (b.dataset.action === "delete-link")
-    prospective((d) => (d.links = d.links.filter((x) => x.id !== id)));
-  else if (b.dataset.action === "delete-fav")
-    prospective((d) => (d.favorites = d.favorites.filter((x) => x.id !== id)));
-  else if (b.dataset.action === "copy-fav") {
-    const x = state.data.favorites.find((x) => x.id === id);
-    if (x)
-      try {
-        await navigator.clipboard.writeText(x.text);
-        showStatus("Prompt copié.");
-      } catch {}
-  }
-  renderSaved();
+  await handleSavedAction(b);
+});
+$("searchResults").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-action]");
+  if (!b) return;
+  await handleSavedAction(b);
 });
 $("settingsBtn").addEventListener("click", () =>
   $("settingsDialog").showModal(),
@@ -1071,9 +1095,15 @@ document.querySelectorAll("[data-account-mode]").forEach((b) =>
   b.addEventListener("click", () => {
     state.accountMode = b.dataset.accountMode;
     clearRecovery();
+    $("accountPassword").autocomplete =
+      state.accountMode === "register" ? "new-password" : "current-password";
     document
       .querySelectorAll("[data-account-mode]")
-      .forEach((x) => x.classList.toggle("active", x === b));
+      .forEach((x) => {
+        const active = x === b;
+        x.classList.toggle("active", active);
+        x.setAttribute("aria-pressed", String(active));
+      });
     $("accountSubmit").textContent =
       state.accountMode === "register" ? "Créer mon compte" : "Se connecter";
   }),
@@ -1145,7 +1175,9 @@ function renderCollections() {
     button.dataset.filter = collection.id;
     button.dataset.customCollection = "true";
     button.textContent = collection.name;
-    button.classList.toggle("active", state.filter === collection.id);
+    const active = state.filter === collection.id;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
     filters.appendChild(button);
   }
   const validFilters = new Set([
@@ -1159,9 +1191,11 @@ function renderCollections() {
   if (!validFilters.has(state.filter)) state.filter = "all";
   filters
     .querySelectorAll(".filter-chip")
-    .forEach((chip) =>
-      chip.classList.toggle("active", chip.dataset.filter === state.filter),
-    );
+    .forEach((chip) => {
+      const active = chip.dataset.filter === state.filter;
+      chip.classList.toggle("active", active);
+      chip.setAttribute("aria-pressed", String(active));
+    });
   if ([...select.options].some((option) => option.value === selected))
     select.value = selected;
 }

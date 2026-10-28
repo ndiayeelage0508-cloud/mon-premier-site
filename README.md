@@ -15,7 +15,7 @@ Pendant la préparation, l’accès à la bibliothèque reste inchangé, dans le
 
 ## Gratuit avec publicités et Premium : préparation
 
-La page présente le modèle à venir, sans prix ni bouton d’achat. Le gabarit publicitaire est inerte : aucune publicité, aucun traceur ni fournisseur n’est ajouté. `product-policy.json` consigne les décisions produit ; ce fichier public n’accorde aucun droit et ne contrôle pas l’API. Aucun accès, stockage, schéma D1, quota ou endpoint du Worker n’est changé par cette préparation.
+La page présente un aperçu régional de prix à titre indicatif, non contractuel et en attente de validation ; aucun bouton d’achat n’est actif. Le gabarit publicitaire est inerte : aucune publicité, aucun traceur ni fournisseur n’est ajouté. `product-policy.json` consigne les décisions produit ; ce fichier public n’accorde aucun droit et ne contrôle pas l’API. Aucun accès, stockage, schéma D1, quota ou endpoint du Worker n’est changé par cette préparation.
 
 Avant activation, faire choisir au propriétaire :
 

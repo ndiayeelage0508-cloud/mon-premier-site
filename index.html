@@ -56,7 +56,7 @@
     <main class="app-shell">
       <section class="hero">
         <p class="eyebrow">TON ESPACE DE CRÉATION</p>
-        <h1>Save now.<br />Find anytime.</h1>
+        <h1>Enregistre.<br />Retrouve.</h1>
         <p class="hero-copy">
           Crée de meilleurs prompts. Garde tes idées. Retrouve tes liens.
         </p>
@@ -76,7 +76,7 @@
           placeholder="Colle un lien ou note une idée…"
           autocomplete="off"
         />
-        <button id="quickAddBtn" class="plus-btn" aria-label="Enregistrer">
+        <button id="quickAddBtn" class="plus-btn" aria-label="Utiliser l’idée ou enregistrer le lien">
           +
         </button>
       </section>
@@ -84,7 +84,7 @@
       <section class="workspace">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">WORKSPACE</p>
+            <p class="eyebrow">TON ESPACE</p>
             <h2>Mon espace</h2>
           </div>
           <span class="count-pill" id="totalCount">0 éléments</span>
@@ -146,8 +146,8 @@
           <span class="ai-badge"><span class="status-dot"></span> IA</span>
         </div>
         <div class="mode-switch" role="group" aria-label="Mode IA">
-          <button class="mode-btn active" data-mode="generate">Générer</button>
-          <button class="mode-btn" data-mode="optimize">Optimiser</button>
+          <button class="mode-btn active" data-mode="generate" aria-pressed="true">Générer</button>
+          <button class="mode-btn" data-mode="optimize" aria-pressed="false">Optimiser</button>
         </div>
         <label for="promptInput" id="promptLabel"
           >Quelle idée veux-tu transformer en prompt ?</label
@@ -191,14 +191,14 @@
             + Collection
           </button>
         </div>
-        <div class="collection-filters" id="collectionFilters">
-          <button class="filter-chip active" data-filter="all">Tout</button>
-          <button class="filter-chip" data-filter="unsorted">
+        <div class="collection-filters" id="collectionFilters" role="group" aria-label="Filtrer la bibliothèque">
+          <button class="filter-chip active" data-filter="all" aria-pressed="true">Tout</button>
+          <button class="filter-chip" data-filter="unsorted" aria-pressed="false">
             Sans dossier
           </button>
-          <button class="filter-chip" data-filter="learning">Études</button>
-          <button class="filter-chip" data-filter="watch">À voir</button>
-          <button class="filter-chip" data-filter="favorites">Favoris</button>
+          <button class="filter-chip" data-filter="learning" aria-pressed="false">Études</button>
+          <button class="filter-chip" data-filter="watch" aria-pressed="false">À voir</button>
+          <button class="filter-chip" data-filter="favorites" aria-pressed="false">Favoris</button>
         </div>
         <form id="linkForm" class="link-form">
           <label class="sr-only" for="linkTitle"
@@ -227,7 +227,7 @@
       <footer style="flex-wrap: wrap">
         <span class="brand-mini">P</span> PromptLab <span>·</span> Tes idées,
         bien rangées.
-        <span>·</span> <a href="./exemples-prompts-ia.html" style="color: inherit; text-underline-offset: 3px">Conseils pour vos prompts IA</a>
+        <span>·</span> <a href="./exemples-prompts-ia.html" style="color: inherit; text-underline-offset: 3px">Conseils pour tes prompts IA</a>
       </footer>
     </main>
 
@@ -238,8 +238,8 @@
       <p class="eyebrow">LES OFFRES PROMPTLAB</p>
       <h2 id="plansTitle">Gratuit &amp; Premium</h2>
       <div class="pricing-intro">
-        <p class="pricing-headline">Faites place à vos meilleures idées.</p>
-        <p>Un seul Premium. Deux rythmes. Comparez les tarifs par pays.</p>
+        <p class="pricing-headline">Fais place à tes meilleures idées.</p>
+        <p>Un seul Premium. Deux rythmes. Compare les aperçus par pays.</p>
         <p class="availability-note">Bientôt disponible. Aucune offre Premium n’est encore en vente.</p>
       </div>
       <section class="plan-option pricing-base" aria-labelledby="freePlanTitle">
@@ -249,26 +249,26 @@
       </section>
       <div class="regional-pricing">
 <section class="region-panel" aria-labelledby="region-label">
-<div class="region-top"><label id="region-label" for="region">Aperçu des prix par pays / région</label><span class="currency-chip" id="currency-chip">XOF · F CFA</span></div>
+<div class="region-top"><label id="region-label" for="region">Aperçu des prix par pays ou région</label><span class="currency-chip" id="currency-chip">XOF · F CFA</span></div>
 <select id="region" aria-describedby="region-help regional-rules"><option value="SN" selected>Sénégal</option></select>
-<p class="region-help" id="region-help">Sélection manuelle uniquement : cet aperçu ne vous géolocalise pas et ne détecte pas votre pays.</p>
+<p class="region-help" id="region-help">Sélection manuelle uniquement : cet aperçu ne te géolocalise pas et ne détecte pas ton pays.</p>
 <p class="regional-rules" id="regional-rules">BCEAO : XOF · CEMAC : XAF · États-Unis : USD · Europe et tous les autres pays : EUR.</p>
 <p class="region-help region-summary" id="region-summary" aria-live="polite" aria-atomic="true">Sénégal — prix affichés en XOF.</p>
 <noscript><p class="region-help">Activez JavaScript pour changer de pays. Sans JavaScript, cet aperçu affiche le Sénégal (XOF).</p></noscript>
 </section>
 <section class="premium" aria-labelledby="premium-title">
 <div class="choose"><div class="offer-head"><div><h2 id="premium-title">Premium</h2><p>Vos prompts organisés, partout avec vous.</p></div><span class="premium-mark" aria-hidden="true">✧</span></div>
-<fieldset><legend>Comparer les formules Premium, sans abonnement</legend><div class="options">
+<fieldset><legend>Compare les formules Premium</legend><div class="options">
 <label class="option" for="monthly"><span class="option-top"><input type="radio" name="plan" id="monthly" value="monthly" checked><span></span></span><span class="period">Mensuel</span><span class="price"><span id="monthly-amount">1 500</span> <span class="currency"><span class="currency-code">XOF</span> / mois</span></span><span class="billing">Facturation mensuelle</span></label>
 <label class="option" for="annual"><span class="option-top"><input type="radio" name="plan" id="annual" value="annual"><span class="save">Économisez ≈ 17 %</span></span><span class="period">Annuel</span><span class="price"><span id="annual-amount">15 000</span> <span class="currency"><span class="currency-code">XOF</span> / an</span></span><span class="billing">Facturation annuelle</span></label>
 </div></fieldset>
-<p class="saving-line">Économisez environ 17 % avec la formule annuelle.<br><span style="font-size:10px">Calcul sur les tarifs de base CFA : 15 000 par an au lieu de 18 000 (12 × 1 500).</span></p>
+<p class="saving-line">Économise environ 17 % avec la formule annuelle.<br><span style="font-size:10px">Calcul sur les tarifs de base CFA : 15 000 par an au lieu de 18 000 (12 × 1 500).</span></p>
 <button class="cta" type="button" disabled><span class="monthly-label">Premium mensuel · bientôt disponible</span><span class="annual-label">Premium annuel · bientôt disponible</span></button>
 <p class="purchase-note">Bientôt disponible · Achat et paiement désactivés</p>
-<p class="rate-note">Tarifs EUR et USD fixes, avec une terminaison en ,99 : il ne s’agit pas d’une conversion automatique. Tarifs CFA inchangés : 1 500 XOF/XAF par mois ou 15 000 XOF/XAF par an. Les économies annuelles sont calculées par devise par rapport à 12 mensualités, puis arrondies au pourcentage le plus proche.</p>
+<p class="rate-note">Aperçu indicatif et non contractuel, en attente de validation. Les montants EUR/USD sont fixes par devise et ne résultent pas d’une conversion automatique. Tarifs CFA affichés : 1 500 XOF/XAF par mois ou 15 000 par an. Les économies annuelles sont calculées par devise par rapport à 12 mensualités, puis arrondies au pourcentage le plus proche.</p>
 </div>
 <div class="features"><h3>Toute l’offre de base est incluse :</h3><ul class="base"><li>Création de prompts</li><li>Optimisation de prompts</li><li>Quotas IA actuels conservés</li><li>Liens simples</li></ul>
-<h3 class="extra">Et tous les avantages Premium :</h3><ul class="plus"><li><strong>Favoris de prompts</strong><span class="feature-detail">Retrouvez vos prompts préférés.</span></li><li><strong>Collections</strong><span class="feature-detail">Organisez votre bibliothèque.</span></li><li><strong>Synchronisation entre appareils</strong><span class="feature-detail">Votre bibliothèque via votre compte.</span></li><li><strong>Aucune publicité</strong><span class="feature-detail">Un espace sans distraction publicitaire.</span></li></ul>
+<h3 class="extra">Et tous les avantages Premium :</h3><ul class="plus"><li><strong>Favoris de prompts</strong><span class="feature-detail">Retrouve tes prompts préférés.</span></li><li><strong>Collections</strong><span class="feature-detail">Organise ta bibliothèque.</span></li><li><strong>Synchronisation entre appareils</strong><span class="feature-detail">Ta bibliothèque via ton compte.</span></li><li><strong>Aucune publicité</strong><span class="feature-detail">Un espace sans distraction publicitaire.</span></li></ul>
 <p class="limits">Les mêmes fonctionnalités dans les deux formules. Les quotas IA actuels restent applicables : aucun accès illimité n’est proposé.</p></div>
 </section>
       </div>
@@ -278,12 +278,12 @@
         Aucun paiement, publicité ou suivi publicitaire n’est activé.</p>
     </dialog>
 
-    <dialog id="settingsDialog" class="settings-dialog">
+    <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsTitle">
       <form method="dialog">
         <button class="dialog-close" aria-label="Fermer">×</button>
       </form>
       <p class="eyebrow">PRÉFÉRENCES</p>
-      <h2>Ton espace, ton rythme.</h2>
+      <h2 id="settingsTitle">Ton espace, ton rythme.</h2>
       <p>
         Les favoris et les liens sont enregistrés localement dans ce navigateur.
         Connecte-toi pour les synchroniser entre appareils.
@@ -298,7 +298,7 @@
         Effacer les données locales
       </button>
     </dialog>
-    <dialog id="accountDialog" class="settings-dialog account-dialog">
+    <dialog id="accountDialog" class="settings-dialog account-dialog" aria-labelledby="accountTitle">
       <form method="dialog">
         <button class="dialog-close" aria-label="Fermer">×</button>
       </form>
@@ -313,17 +313,19 @@
         connexion peut être nécessaire. Les bibliothèques locales restent conservées.
       </p>
       <div id="accountLoggedOut">
-        <div class="account-tabs">
+        <div class="account-tabs" role="group" aria-label="Mode du compte">
           <button
             type="button"
             class="filter-chip active"
             data-account-mode="login"
+            aria-pressed="true"
           >
             Connexion</button
           ><button
             type="button"
             class="filter-chip"
             data-account-mode="register"
+            aria-pressed="false"
           >
             Inscription
           </button>
@@ -372,6 +374,7 @@
             nouveau mot de passe, sans relancer automatiquement la récupération.
           </p>
           <form id="recoveryForm" class="account-form">
+            <label class="sr-only" for="recoveryCode">Code de récupération hexadécimal</label>
             <input
               id="recoveryCode"
               inputmode="text"
@@ -382,7 +385,7 @@
               spellcheck="false"
               placeholder="Code de récupération hexadécimal"
               required
-            /><input
+            /><label class="sr-only" for="recoveryPassword">Nouveau mot de passe</label><input
               id="recoveryPassword"
               type="password"
               minlength="12"
@@ -422,12 +425,13 @@
       </div>
       <p class="notice" id="accountStatus" role="status"></p>
     </dialog>
-    <dialog id="searchDialog" class="settings-dialog">
+    <dialog id="searchDialog" class="settings-dialog" aria-labelledby="searchTitle">
       <form method="dialog">
         <button class="dialog-close" aria-label="Fermer">×</button>
       </form>
       <p class="eyebrow">RECHERCHE</p>
-      <h2>Retrouve une idée ou un lien</h2>
+      <h2 id="searchTitle">Retrouve une idée ou un lien</h2>
+      <label class="sr-only" for="searchInput">Rechercher dans tes idées et tes liens</label>
       <input id="searchInput" type="search" placeholder="Rechercher…" />
       <div id="searchResults" class="saved-list"></div>
     </dialog>

@@ -531,6 +531,10 @@ footer {
 }
 .settings-dialog {
   width: min(92vw, 480px);
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: var(--line);
   border-radius: 18px;
   box-shadow: var(--shadow);
@@ -671,6 +675,15 @@ footer {
     flex-direction: column;
   }
 }
+@media (max-width: 560px) {
+  .link-form {
+    grid-template-columns: 1fr;
+  }
+  .link-form .primary-btn,
+  .link-form select {
+    grid-column: auto;
+  }
+}
 .account-dialog {
   max-height: 90vh;
   overflow: auto;
@@ -684,7 +697,7 @@ footer {
   display: grid;
   gap: 7px;
 }
-.account-form label {
+.account-form label:not(.sr-only) {
   margin: 7px 0 0;
 }
 .account-form .primary-btn {
