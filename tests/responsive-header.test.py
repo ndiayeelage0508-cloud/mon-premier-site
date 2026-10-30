@@ -54,9 +54,43 @@ try:
                 ("plansBtn", "plansDialog"),
             )
 
-            for width in (320, 375, 390):
+            for width in (320, 360, 375, 390, 430, 768, 1024, 1440):
                 page.set_viewport_size({"width": width, "height": 850})
                 page.goto(base_url, wait_until="networkidle")
+                if width == 320:
+                    pwa = page.evaluate(
+                        """async () => {
+                          const manifestLink = document.querySelector('link[rel="manifest"]');
+                          const response = await fetch(manifestLink.href);
+                          const manifest = await response.json();
+                          const icons = await Promise.all(manifest.icons.map(async (icon) => {
+                            const image = new Image();
+                            image.src = new URL(icon.src, manifestLink.href).href;
+                            await image.decode();
+                            return [image.naturalWidth, image.naturalHeight];
+                          }));
+                          const appleIcon = new Image();
+                          appleIcon.src = document.querySelector('link[rel="apple-touch-icon"]').href;
+                          await appleIcon.decode();
+                          const registrations = 'serviceWorker' in navigator
+                            ? await navigator.serviceWorker.getRegistrations()
+                            : [];
+                          return {
+                            ok: response.ok,
+                            mime: response.headers.get('content-type'),
+                            name: manifest.short_name,
+                            display: manifest.display,
+                            iconSizes: icons,
+                            appleIcon: [appleIcon.naturalWidth, appleIcon.naturalHeight],
+                            serviceWorkers: registrations.length,
+                          };
+                        }"""
+                    )
+                    assert pwa["ok"], "manifest did not load over HTTP"
+                    assert pwa["name"] == "PromptLab" and pwa["display"] == "standalone"
+                    assert pwa["iconSizes"] == [[192, 192], [512, 512]]
+                    assert pwa["appleIcon"] == [180, 180]
+                    assert pwa["serviceWorkers"] == 0, "no service worker should intercept/cache user data"
                 geometry = page.evaluate(
                     """() => {
                       const rect = (selector) => {
@@ -70,6 +104,9 @@ try:
                         account: rect('#accountBtn'),
                         settings: rect('#settingsBtn'),
                         search: rect('#searchBtn'),
+                        shell: rect('.app-shell'),
+                        toolPanel: rect('#toolPanel'),
+                        linksPanel: rect('#linksPanel'),
                       };
                     }"""
                 )
@@ -84,6 +121,10 @@ try:
                 )
                 assert geometry["account"]["right"] <= geometry["settings"]["left"]
                 assert geometry["settings"]["right"] <= geometry["search"]["left"]
+                for selector in ("shell", "toolPanel", "linksPanel"):
+                    assert geometry[selector]["left"] >= 0 and geometry[selector]["right"] <= width, (
+                        f"{selector} is clipped at {width}px: {geometry[selector]}"
+                    )
 
                 for trigger_id, dialog_id in dialogs:
                     page.locator(f"#{trigger_id}").click()
@@ -93,8 +134,7 @@ try:
                     page.locator(f"#{dialog_id}").evaluate("dialog => dialog.close()")
 
                 print(
-                    f"responsive-header.test.py: {width}px OK; search x={geometry['search']['left']:.1f}.."
-                    f"{geometry['search']['right']:.1f}; no overflow; 4 dialogs OK"
+                    f"responsive-header.test.py: {width}px OK; no page/panel overflow; 4 dialogs OK"
                 )
         finally:
             browser.close()

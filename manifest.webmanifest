@@ -1,0 +1,27 @@
+{
+  "id": "./",
+  "name": "PromptLab — création de prompts et sauvegarde de liens",
+  "short_name": "PromptLab",
+  "description": "Crée et améliore tes prompts, puis retrouve tes idées et tes liens.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fffdf9",
+  "theme_color": "#ffd21c",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
