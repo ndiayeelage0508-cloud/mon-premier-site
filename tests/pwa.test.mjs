@@ -23,6 +23,8 @@ test('le manifeste définit une web app installable sous le chemin GitHub Pages'
   assert.equal(manifest.display, 'standalone');
   assert.equal(manifest.lang, 'fr');
   assert.equal(manifest.theme_color, '#ffd21c');
+  assert.equal(manifest.id, '/mon-premier-site/');
+  assert.equal(new URL(manifest.id, publicBase).href, publicBase.href);
   assert.equal(new URL(manifest.start_url, publicBase).href, publicBase.href);
   assert.equal(new URL(manifest.scope, publicBase).href, publicBase.href);
 
